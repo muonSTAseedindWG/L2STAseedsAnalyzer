@@ -1,0 +1,137 @@
+// -*- C++ -*-
+//
+// Package:    L2seedsAnalyzer
+// Class:      L2seedsAnalyzer
+// 
+/**\class L2seedsAnalyzer L2seedsAnalyzer.cc hugues/L2seedsAnalyzer/plugins/L2seedsAnalyzer.cc
+
+ Description: [one line class summary]
+
+ Implementation:
+     [Notes on implementation]
+*/
+//
+// Original Author:  Hugues Brun
+//         Created:  Wed, 18 Sep 2013 09:47:45 GMT
+// $Id$
+//
+//
+
+
+// system include files
+#include <memory>
+
+// user include files
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+
+
+// root stuff 
+#include "TH1D.h"
+#include <map>
+#include "TFile.h"
+#include <math.h>
+#include <sstream>
+#include <string>
+#include <stdlib.h>
+#include <string.h>
+#include "TLorentzVector.h"
+#include "TVector3.h"
+#include "TString.h"
+#include "TTree.h"
+//
+// class declaration
+//
+
+class L2seedsAnalyzer : public edm::EDAnalyzer {
+   public:
+      explicit L2seedsAnalyzer(const edm::ParameterSet&);
+      ~L2seedsAnalyzer();
+
+      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+
+
+   private:
+      virtual void beginJob() override;
+      virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+      virtual void endJob() override;
+
+      //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
+      //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
+      //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+      //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+
+      // ----------member data ---------------------------
+    
+    
+      // Tree and outfile
+      // root file to store histograms
+      TFile*  rootFile_;
+      std::string outputFile_; // output file name
+     
+      //Tree
+      TTree* mytree_;
+    
+//variables to save in the tree
+        //Event infos
+        int T_Event_RunNumber;
+        int T_Event_EventNumber;
+        int T_Event_LuminosityBlock;
+    
+        //Reco Muon info
+        std::vector<float>*T_Muon_Eta;
+        std::vector<float>*T_Muon_Phi;
+        std::vector<float>*T_Muon_Energy;
+        std::vector<float>*T_Muon_Et;
+        std::vector<float>*T_Muon_Pt;
+        std::vector<float>*T_Muon_Px;
+        std::vector<float>*T_Muon_Py;
+        std::vector<float>*T_Muon_Pz;
+        std::vector<float>*T_Muon_Mass;
+    
+    
+        std::vector<bool> *T_Muon_IsGlobalMuon;
+        std::vector<bool> *T_Muon_IsTrackerMuon;
+        std::vector<bool> *T_Muon_IsPFMuon;
+        std::vector<bool> *T_Muon_IsCaloMuon;
+        std::vector<bool> *T_Muon_IsStandAloneMuon;
+        std::vector<bool> *T_Muon_IsMuon;
+        std::vector<bool> *T_Muon_IsGlobalMuon_PromptTight;
+        std::vector<bool> *T_Muon_IsTrackerMuonArbitrated;
+        std::vector<int>  *T_Muon_numberOfChambers;
+        std::vector<int>  *T_Muon_numberOfChambersRPC;
+        std::vector<int>  *T_Muon_numberOfMatches;
+        std::vector<int>  *T_Muon_numberOfMatchedStations;
+        std::vector<int>  *T_Muon_charge;
+    
+    
+        std::vector<bool> *T_Muon_TMLastStationTight;
+        std::vector<float> *T_Muon_globalTrackChi2;
+        std::vector<int>  *T_Muon_validMuonHits;
+        std::vector<float> *T_Muon_trkKink;
+        std::vector<int>  *T_Muon_trkNbOfTrackerLayers;
+        std::vector<int>  *T_Muon_trkNbOfValidTrackeHits;
+        std::vector<int>  *T_Muon_trkValidPixelHits;
+        std::vector<float> *T_Muon_trkError;
+        std::vector<float> *T_Muon_dB;
+        std::vector<float> *T_Muon_dzPV;
+    
+    
+        //the muon GEN infos 
+        std::vector<float> *T_Gen_Muon_Px;
+        std::vector<float> *T_Gen_Muon_Py;
+        std::vector<float> *T_Gen_Muon_Pz;
+        std::vector<float> *T_Gen_Muon_Energy;
+        std::vector<float> *T_Gen_Muon_deltaR;
+        std::vector<int> *T_Gen_Muon_MCpart;
+        std::vector<int> *T_Gen_Muon_PDGid;
+        std::vector<int> *T_Gen_Muon_status;
+        std::vector<int> *T_Gen_Muon_MotherID;
+    
+};
+

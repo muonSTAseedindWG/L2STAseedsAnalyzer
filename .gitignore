@@ -1,0 +1,7 @@
+*.root
+*.json
+.DS_*
+._.*
+._*
+*.pyc
+__init*
