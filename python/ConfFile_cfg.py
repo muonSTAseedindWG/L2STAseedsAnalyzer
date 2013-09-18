@@ -14,6 +14,8 @@ process.source = cms.Source("PoolSource",
 )
 
 process.demo = cms.EDAnalyzer('L2seedsAnalyzer',
+                              muonProducer 		= cms.VInputTag(cms.InputTag("muons")),
+                              primaryVertexInputTag   	= cms.InputTag("offlinePrimaryVertices"),
                               outputFile = cms.string("muonSeedTree.root")
 )
 

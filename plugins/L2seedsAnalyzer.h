@@ -30,6 +30,13 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/MuonReco/interface/MuonFwd.h"
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
+
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+
 
 // root stuff 
 #include "TH1D.h"
@@ -44,10 +51,16 @@
 #include "TVector3.h"
 #include "TString.h"
 #include "TTree.h"
+
+//
+// Usefull typedef
+//
+typedef std::vector<edm::InputTag> vtag;
+
+
 //
 // class declaration
 //
-
 class L2seedsAnalyzer : public edm::EDAnalyzer {
    public:
       explicit L2seedsAnalyzer(const edm::ParameterSet&);
@@ -60,6 +73,8 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       virtual void beginJob() override;
       virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
       virtual void endJob() override;
+      virtual void beginEvent();
+      virtual void endEvent();
 
       //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
       //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
@@ -68,6 +83,8 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
 
       // ----------member data ---------------------------
     
+      vtag muonProducers_;
+      edm::InputTag   primaryVertexInputTag_;    
     
       // Tree and outfile
       // root file to store histograms
