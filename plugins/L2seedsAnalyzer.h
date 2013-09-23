@@ -28,6 +28,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include "FWCore/Framework/interface/ESHandle.h"
+
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/MuonReco/interface/Muon.h"
@@ -36,6 +38,29 @@
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+
+
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "DataFormats/Common/interface/RefToPtr.h"
+
+#include "DataFormats/Candidate/interface/CandMatchMap.h"
+#include "DataFormats/Candidate/interface/CandidateFwd.h"
+
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+
+
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
+#include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "DataFormats/TrajectorySeed/interface/TrajectorySeedCollection.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "RecoMuon/TrackingTools/interface/MuonPatternRecoDumper.h"
 
 
 // root stuff 
@@ -82,9 +107,10 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
       // ----------member data ---------------------------
-    
+      bool isMC_; 
       vtag muonProducers_;
-      edm::InputTag   primaryVertexInputTag_;    
+      edm::InputTag   primaryVertexInputTag_;
+      std::string theSTAMuonLabel_;
     
       // Tree and outfile
       // root file to store histograms
@@ -144,8 +170,9 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
         std::vector<float> *T_Gen_Muon_Py;
         std::vector<float> *T_Gen_Muon_Pz;
         std::vector<float> *T_Gen_Muon_Energy;
-        std::vector<float> *T_Gen_Muon_deltaR;
-        std::vector<int> *T_Gen_Muon_MCpart;
+        std::vector<float> *T_Gen_Muon_Pt;
+        std::vector<float> *T_Gen_Muon_Eta;
+        std::vector<float> *T_Gen_Muon_Phi;
         std::vector<int> *T_Gen_Muon_PDGid;
         std::vector<int> *T_Gen_Muon_status;
         std::vector<int> *T_Gen_Muon_MotherID;

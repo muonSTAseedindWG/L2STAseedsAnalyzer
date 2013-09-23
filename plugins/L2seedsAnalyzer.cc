@@ -5,9 +5,10 @@ L2seedsAnalyzer::L2seedsAnalyzer(const edm::ParameterSet& iConfig)
 
 {
    //now do what ever initialization is needed
-    
+    isMC_                   = iConfig.getParameter<bool>("isMC");
     muonProducers_	= iConfig.getParameter<vtag>("muonProducer");
     primaryVertexInputTag_  = iConfig.getParameter<edm::InputTag>("primaryVertexInputTag");
+    theSTAMuonLabel_ = iConfig.getUntrackedParameter<std::string>("StandAloneTrackCollectionLabel");
     outputFile_     = iConfig.getParameter<std::string>("outputFile");
     rootFile_       = TFile::Open(outputFile_.c_str(),"RECREATE");
 
@@ -47,6 +48,25 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
    // const reco::VertexCollection& vtxs = *(vtx_h.product());
     
     
+    // magnetic fied and detector geometry 
+    ESHandle<MagneticField> theMGField;
+    iSetup.get<IdealMagneticFieldRecord>().get(theMGField);
+    
+    ESHandle<GlobalTrackingGeometry> theTrackingGeometry;
+    iSetup.get<GlobalTrackingGeometryRecord>().get(theTrackingGeometry);
+    
+    
+    //stand alone muons tracks
+    Handle<reco::TrackCollection> staTracks;
+    iEvent.getByLabel(theSTAMuonLabel_, staTracks);
+    
+    //cout << "there are " << staTracks->size() << " StandAlone muons in the event" << endl;
+    
+    // gen particles
+     edm::Handle <reco::GenParticleCollection> genParticles;
+    
+
+    
     beginEvent();
     
     
@@ -67,7 +87,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 
     int nbMuons = recoMuons->size();
-    cout << "there are " << nbMuons << " muons in the event" << endl;
+    //cout << "there are " << nbMuons << " muons in the event" << endl;
    
     //loop on the reco muons in the event
     for (int k = 0 ; k < nbMuons ; k++){
@@ -91,7 +111,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         T_Muon_Mass->push_back(muon->mass());
         T_Muon_charge->push_back(muon->charge());
     
-    
+      //  cout << "info muon" << endl;
         T_Muon_numberOfChambers->push_back(muon->numberOfChambers());
         T_Muon_numberOfChambersRPC->push_back(muon->numberOfChambersNoRPC());
         T_Muon_numberOfMatches->push_back(muon->numberOfMatches());
@@ -103,6 +123,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         T_Muon_IsGlobalMuon_PromptTight->push_back(isGlobalMuonPT);
         T_Muon_IsTrackerMuonArbitrated->push_back(isGlobalMuonArbitrated);
         
+     //   cout << "last info muon" << endl;
         if (muon->globalTrack().isNull()) T_Muon_globalTrackChi2->push_back(-1); else T_Muon_globalTrackChi2->push_back(muon->globalTrack()->normalizedChi2());
         if (muon->globalTrack().isNull()) T_Muon_validMuonHits->push_back(-1); else T_Muon_validMuonHits->push_back(muon->globalTrack()->hitPattern().numberOfValidMuonHits());
         T_Muon_trkKink->push_back(muon->combinedQuality().trkKink);
@@ -126,6 +147,34 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     
     
     }
+    
+    
+   if(isMC_){
+        edm::Handle<GenEventInfoProduct> genEvent;
+        iEvent.getByLabel("generator", genEvent);
+        iEvent.getByLabel("genParticles", genParticles );
+        
+        int nbOfGen = genParticles->size();
+        for (int j = 0 ; j < nbOfGen ; j++){
+            const reco::GenParticle & theCand = (*genParticles)[j];
+            T_Gen_Muon_Px->push_back(theCand.px());
+            T_Gen_Muon_Py->push_back(theCand.py());
+            T_Gen_Muon_Pz->push_back(theCand.pz());
+            T_Gen_Muon_Phi->push_back(theCand.phi());
+            T_Gen_Muon_Eta->push_back(theCand.eta());
+            T_Gen_Muon_Energy->push_back(theCand.energy());
+            T_Gen_Muon_PDGid->push_back(theCand.pdgId());
+            T_Gen_Muon_status->push_back(theCand.status());
+        }
+    }
+    
+    //read the StandAlone muon
+    reco::TrackCollection::const_iterator staTrack;
+    for (staTrack = staTracks->begin(); staTrack != staTracks->end(); ++staTrack){
+        cout << "coucou une trace ! " << endl;
+        reco::TransientTrack track(*staTrack,&*theMGField,theTrackingGeometry);
+    }
+    
     
     mytree_->Fill();
     
@@ -179,7 +228,18 @@ L2seedsAnalyzer::beginJob()
     mytree_->Branch("T_Muon_dzPV", "std::vector<float>", &T_Muon_dzPV);
 
 
-
+    if (isMC_){
+        mytree_->Branch("T_Gen_Muon_Px", "std::vector<float>", &T_Gen_Muon_Px);
+        mytree_->Branch("T_Gen_Muon_Py", "std::vector<float>", &T_Gen_Muon_Py);
+        mytree_->Branch("T_Gen_Muon_Pz", "std::vector<float>", &T_Gen_Muon_Pz);
+        mytree_->Branch("T_Gen_Muon_Energy", "std::vector<float>", &T_Gen_Muon_Energy);
+        mytree_->Branch("T_Gen_Muon_Pt", "std::vector<float>", &T_Gen_Muon_Pt);
+        mytree_->Branch("T_Gen_Muon_Eta", "std::vector<float>", &T_Gen_Muon_Eta);
+        mytree_->Branch("T_Gen_Muon_Phi", "std::vector<float>", &T_Gen_Muon_Phi);
+        mytree_->Branch("T_Gen_Muon_PDGid", "std::vector<int>", &T_Gen_Muon_PDGid);
+        mytree_->Branch("T_Gen_Muon_status", "std::vector<int>", &T_Gen_Muon_status);
+        mytree_->Branch("T_Gen_Muon_MotherID", "std::vector<int>", &T_Gen_Muon_MotherID);
+    }
 
 
 }
@@ -231,7 +291,17 @@ L2seedsAnalyzer::beginEvent()
     T_Muon_dB = new std::vector<float>;
     T_Muon_dzPV = new std::vector<float>;
 
-    
+    T_Gen_Muon_Px = new std::vector<float>;
+    T_Gen_Muon_Py = new std::vector<float>;
+    T_Gen_Muon_Pz = new std::vector<float>;
+    T_Gen_Muon_Energy = new std::vector<float>;
+    T_Gen_Muon_Pt = new std::vector<float>;
+    T_Gen_Muon_Eta = new std::vector<float>;
+    T_Gen_Muon_Phi = new std::vector<float>;
+    T_Gen_Muon_PDGid = new std::vector<int>;
+    T_Gen_Muon_status = new std::vector<int>;
+    T_Gen_Muon_MotherID = new std::vector<int>;
+   
     
     
 }
@@ -274,6 +344,18 @@ L2seedsAnalyzer::endEvent()
     delete T_Muon_trkError;
     delete T_Muon_dB;
     delete T_Muon_dzPV;
+    
+    
+    delete T_Gen_Muon_Px;
+    delete T_Gen_Muon_Py;
+    delete T_Gen_Muon_Pz;
+    delete T_Gen_Muon_Energy;
+    delete T_Gen_Muon_Pt;
+    delete T_Gen_Muon_Eta;
+    delete T_Gen_Muon_Phi;
+    delete T_Gen_Muon_PDGid;
+    delete T_Gen_Muon_status;
+    delete T_Gen_Muon_MotherID;
 
     
 }
