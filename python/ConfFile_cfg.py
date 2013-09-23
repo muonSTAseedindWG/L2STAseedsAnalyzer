@@ -17,18 +17,20 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
     fileNames = cms.untracked.vstring(
-        'file:/sps/cms/hbrun/CMSSW_6_2_0_patch1_L2seedingDev/src/files/oldGeometry_RECO.root'
+                                      #'file:/sps/cms/hbrun/CMSSW_6_2_0_patch1_L2seedingDev/src/files/oldGeometry_RECO.root'
+                                      'file:/sps/cms/hbrun/CMSSW_6_2_0_patch1_L2seedingDev/src/files/NewGeometry_RECO.root' #attention Pt 100 
     )
 )
 
-"""process.load("SimMuon.MCTruth.MuonAssociatorByHits_cfi")
+process.load("SimMuon.MCTruth.MuonAssociatorByHits_cfi")
 process.muonAssociatorByHits.tracksTag = cms.InputTag("standAloneMuons")
 process.muonAssociatorByHits.UseTracker = cms.bool(False)
 process.muonAssociatorByHits.UseMuon = cms.bool(True)
 process.muonAssociatorByHits.PurityCut_muon = cms.double(0.01)
 process.muonAssociatorByHits.EfficiencyCut_muon = cms.double(0.01)
-"""
 
+#process.load("SimGeneral.TrackingAnalysis.trackingParticles_cfi")
+#process.load("SimGeneral.MixingModule.trackingTruthProducer_cfi")
 
 process.runL2seed = cms.EDAnalyzer('L2seedsAnalyzer',
                               isMC                    = cms.bool(True),
@@ -39,4 +41,9 @@ process.runL2seed = cms.EDAnalyzer('L2seedsAnalyzer',
 )
 
 
-process.p = cms.Path(process.runL2seed)
+process.p = cms.Path(process.muonAssociatorByHits+process.runL2seed)
+
+
+
+
+
