@@ -62,6 +62,10 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "RecoMuon/TrackingTools/interface/MuonPatternRecoDumper.h"
 
+#include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/RecoCandidate/interface/TrackAssociation.h"
+
 
 // root stuff 
 #include "TH1D.h"
@@ -111,6 +115,8 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       vtag muonProducers_;
       edm::InputTag   primaryVertexInputTag_;
       std::string theSTAMuonLabel_;
+      edm::InputTag standAloneAssociatorTag_;
+      edm::InputTag trackingParticlesTag_;
     
       // Tree and outfile
       // root file to store histograms
@@ -175,7 +181,17 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
         std::vector<float> *T_Gen_Muon_Phi;
         std::vector<int> *T_Gen_Muon_PDGid;
         std::vector<int> *T_Gen_Muon_status;
-        std::vector<int> *T_Gen_Muon_MotherID;
+    std::vector<int> *T_Gen_Muon_MotherID;
+    std::vector<float> *T_Gen_Muon_tpPt;
+    std::vector<float> *T_Gen_Muon_tpEta;
+    std::vector<float> *T_Gen_Muon_tpPhi;
+    std::vector<int> *T_Gen_Muon_FoundSTA;
+    std::vector<float> *T_Gen_Muon_StaPt;
+    std::vector<float> *T_Gen_Muon_StaEta;
+    std::vector<float> *T_Gen_Muon_StaPhi;
+    std::vector<float> *T_Gen_Muon_StaPurity;
+    std::vector<float> *T_Gen_Muon_StaQuality;
+    
     
 };
 

@@ -12,7 +12,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = 'PRE_ST62_V8::All'
 
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
 
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
@@ -36,7 +36,9 @@ process.runL2seed = cms.EDAnalyzer('L2seedsAnalyzer',
                               isMC                    = cms.bool(True),
                               muonProducer 		= cms.VInputTag(cms.InputTag("muons")),
                               primaryVertexInputTag   	= cms.InputTag("offlinePrimaryVertices"),
-                              StandAloneTrackCollectionLabel = cms.untracked.string('standAloneMuons'), 
+                              StandAloneTrackCollectionLabel = cms.untracked.string('standAloneMuons'),
+                              trackingParticlesCollection = cms.InputTag("mix","MergedTrackTruth"),
+                              standAloneAssociator = cms.InputTag("muonAssociatorByHits"),
                               outputFile = cms.string("muonSeedTree.root")
 )
 
