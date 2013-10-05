@@ -35,7 +35,7 @@ void
 L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
     using namespace edm;
-    using namespace std;
+ //   using namespace std;
     using namespace reco;
     
     //muon collection :
@@ -75,6 +75,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         simRecColl = *(simRecoHandle.product());
     } else {
         cout << "no valid sim RecHit product found ! " << endl;
+        return;
     }
     
     //RECO to sim tracks associator
@@ -86,6 +87,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         recSimColl = *(recoSimHandle.product());
     } else {
         cout << "no valid sim RecHit product found ! " << endl;
+        return;
     }
     
     // tracking particles collection
@@ -206,6 +208,8 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                     T_Gen_Muon_tpEta->push_back(trpart->eta());
                     T_Gen_Muon_tpPhi->push_back(trpart->phi());
                     // now look for a STD muon
+                    edm::RefToBase<reco::Track> *theSTAMuon;
+                    
                 }
             }
         }
@@ -218,7 +222,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         cout << "There are " << tPC.size() << " TrackingParticles "<<"("<<simRecColl.size()<<" matched) " << endl;
         bool foundAmatch = false;
     
-    
+    TrackingParticleRef trpart, reco::SimToRecoCollection simRecColl, reco::RecoToSimCollection recSimColl
     
         for (TrackingParticleCollection::size_type i=0; i<tPC.size(); i++) {
             TrackingParticleRef trpart(TPCollectionH, i);
@@ -361,9 +365,53 @@ L2seedsAnalyzer::beginJob()
 
 }
 
+
+bool
+L2seedsAnalyzer::findAstaMuon(TrackingParticleRef trpart, reco::SimToRecoCollection simRecColl, reco::RecoToSimCollection recSimColl, edm::RefToBase<reco::Track> *theSTAMuon){
+    //1) find the STA muons if there is.
+    bool foundAmatch=false;
+    edm::RefToBase<reco::Track> theBestQualitySTA; //will store the STA with the best quality !
+    float bestQuality=0; //initial value
+    std::vector<std::pair<edm::RefToBase<reco::Track>, double> > simRecAsso;
+    if(simRecColl.find(trpart) != simRecColl.end()) {
+        simRecAsso = (std::vector<std::pair<edm::RefToBase<reco::Track>, double> >) simRecColl[trpart];
+    //2) loop on the STA muons matched 
+        for (std::vector<std::pair<edm::RefToBase<reco::Track>, double> >::const_iterator IT = simRecAsso.begin();
+             IT != simRecAsso.end(); ++IT) {
+           // cout << "inside !! " << endl;
+            edm::RefToBase<reco::Track> track = IT->first;
+            double quality = IT->second;
+            if (quality>bestQuality){
+                bestQuality=quality;
+                theBestQualitySTA = track;
+            }
+            foundAmatch = true;
+        }
+    //3) now that we have the STA with the best quality, check its purity
+        double purity = -1.;
+        if(recSimColl.find(theBestQualitySTA) != recSimColl.end()) {
+            std::vector<std::pair<TrackingParticleRef, double> > recSimAsso = recSimColl[theBestQualitySTA];
+            for (std::vector<std::pair<TrackingParticleRef, double> >::const_iterator ITS = recSimAsso.begin();
+                 ITS != recSimAsso.end(); ++ITS) {
+                TrackingParticleRef tp = ITS->first;
+                if (tp == trpart) purity = ITS->second;
+                cout << foundAmatch<< endl;
+
+            }
+        }
+        if (foundAmatch) *theSTAMuon= theBestQualitySTA;
+        cout <<theSTAMuon->
+        cout << "purity=" << purity <<  endl;
+    }
+     /*       // find the purity from RecoToSim association (set purity = -1 for unmatched recoToSim)
+           */
+    
+    return foundAmatch;
+}
+
 // ------------ method called once each job just after ending the event loop  ------------
-void 
-L2seedsAnalyzer::endJob() 
+void
+L2seedsAnalyzer::endJob()
 {
     rootFile_->Write();
     rootFile_->Close();

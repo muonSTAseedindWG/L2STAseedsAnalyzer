@@ -17,6 +17,8 @@
 //
 //
 
+using namespace std;
+
 
 // system include files
 #include <memory>
@@ -104,6 +106,9 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       virtual void endJob() override;
       virtual void beginEvent();
       virtual void endEvent();
+    
+    virtual bool findAstaMuon(TrackingParticleRef, reco::SimToRecoCollection, reco::RecoToSimCollection, edm::RefToBase<reco::Track>*);
+
 
       //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
       //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
