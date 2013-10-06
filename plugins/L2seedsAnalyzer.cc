@@ -208,85 +208,27 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                     T_Gen_Muon_tpEta->push_back(trpart->eta());
                     T_Gen_Muon_tpPhi->push_back(trpart->phi());
                     // now look for a STD muon
-                    edm::RefToBase<reco::Track> *theSTAMuon;
+                    //edm::RefToBase<reco::Track> *theSTAMuon = 0;
+                    bool isTrackFound = false;
+                    float matchQuality, matchPurity;
+                    edm::RefToBase<reco::Track> theSTAMuon = findAstaMuon(trpart, simRecColl, recSimColl, &isTrackFound, &matchQuality, &matchPurity);
+                  //  cout << "found=" << isTrackFound << " quality=" << matchQuality << " purity=" << matchPurity <<  endl;
+                   // if (isTrackFound) cout << "STA muon PT=" << (theSTAMuon)->pt() << endl;
+                    if (isTrackFound) {
+                        T_Gen_Muon_FoundSTA->push_back(1);
+                        T_Gen_Muon_StaPt->push_back(theSTAMuon->pt());
+                        T_Gen_Muon_StaEta->push_back(theSTAMuon->eta());
+                        T_Gen_Muon_StaPhi->push_back(theSTAMuon->phi());
+                        T_Gen_Muon_FoundSTA->push_back(matchQuality);
+                        T_Gen_Muon_FoundSTA->push_back(matchPurity);
+                    }
+                    else T_Gen_Muon_FoundSTA->push_back(0);
                     
                 }
             }
         }
     }
     
-    
-    // now run on the tracking particles !
-   /* if (simRecoHandle.isValid()){
-        
-        cout << "There are " << tPC.size() << " TrackingParticles "<<"("<<simRecColl.size()<<" matched) " << endl;
-        bool foundAmatch = false;
-    
-    TrackingParticleRef trpart, reco::SimToRecoCollection simRecColl, reco::RecoToSimCollection recSimColl
-    
-        for (TrackingParticleCollection::size_type i=0; i<tPC.size(); i++) {
-            TrackingParticleRef trpart(TPCollectionH, i);
-            cout << "tracking particle:   eta=" << trpart->eta() << " phi=" << trpart->phi() << " pt=" << trpart->pt() << endl;
-            std::vector<std::pair<edm::RefToBase<reco::Track>, double> > simRecAsso;
-        
-            if(simRecColl.find(trpart) != simRecColl.end()) {
-                simRecAsso = (std::vector<std::pair<edm::RefToBase<reco::Track>, double> >) simRecColl[trpart];
-            
-                for (std::vector<std::pair<edm::RefToBase<reco::Track>, double> >::const_iterator IT = simRecAsso.begin();
-                     IT != simRecAsso.end(); ++IT) {
-                    cout << "inside !! " << endl;
-                    edm::RefToBase<reco::Track> track = IT->first;
-                    double quality = IT->second;
-                    foundAmatch = true;
-                
-                // find the purity from RecoToSim association (set purity = -1 for unmatched recoToSim)
-                    double purity = -1.;
-                    if(recSimColl.find(track) != recSimColl.end()) {
-                        std::vector<std::pair<TrackingParticleRef, double> > recSimAsso = recSimColl[track];
-                        for (std::vector<std::pair<TrackingParticleRef, double> >::const_iterator ITS = recSimAsso.begin();
-                             ITS != recSimAsso.end(); ++ITS) {
-                            TrackingParticleRef tp = ITS->first;
-                            if (tp == trpart) purity = ITS->second;
-                            cout << foundAmatch<< endl;
-                            cout  <<"TrackingParticle #" << int(i)<< " with pt = " << trpart->pt()
-                            << " associated to reco::Track #" <<track.key()
-                            << " (pt = " << track->pt() << ") with Quality = " << quality
-                            << " and Purity = "<< purity << endl;
-                        }
-                    }
-                
-                    
-            
-                }
-        
-        
-            }
-        }
-    }*/
-    //read the StandAlone muon
-   /* reco::TrackCollection::const_iterator staTrack;
-    for (staTrack = staTracks->begin(); staTrack != staTracks->end(); ++staTrack){
-        cout << "coucou une trace ! " << endl;
-        edm::RefToBase<reco::Track> track = staTrack;
-        //reco::TransientTrack track(*staTrack,&*theMGField,theTrackingGeometry);
-        if (recSimColl.size()>0) continue;*/
-           /*if(recSimColl.find(staTracks) != recSimColl.end()) {
-                cout << "we found a mc track" << endl;
-            }*/
-        
-   // }
-    
-  /*  edm::View<reco::Track> trackCollection = *(staTracks.product());
-    for(edm::View<reco::Track>::size_type i=0; i<trackCollection.size(); ++i) {
-        edm::RefToBase<reco::Track> track(staTracks, i);
-        cout << "coucou les traks!" << endl;
-        
-        cout << "size=" << recSimColl.size() << endl;
-        if (!(recSimColl.size()>0)) continue;
-        if(recSimColl.find(track) != recSimColl.end()) {
-            cout << "we found it !! " << endl;
-        }
-    }*/
     
     mytree_->Fill();
     
@@ -366,12 +308,13 @@ L2seedsAnalyzer::beginJob()
 }
 
 
-bool
-L2seedsAnalyzer::findAstaMuon(TrackingParticleRef trpart, reco::SimToRecoCollection simRecColl, reco::RecoToSimCollection recSimColl, edm::RefToBase<reco::Track> *theSTAMuon){
+edm::RefToBase<reco::Track>
+L2seedsAnalyzer::findAstaMuon(TrackingParticleRef trpart, reco::SimToRecoCollection simRecColl, reco::RecoToSimCollection recSimColl, bool *trackFound, float *theMatchQuality, float *theMatchPurity){
     //1) find the STA muons if there is.
     bool foundAmatch=false;
     edm::RefToBase<reco::Track> theBestQualitySTA; //will store the STA with the best quality !
     float bestQuality=0; //initial value
+   // cout << bestQuality << endl;
     std::vector<std::pair<edm::RefToBase<reco::Track>, double> > simRecAsso;
     if(simRecColl.find(trpart) != simRecColl.end()) {
         simRecAsso = (std::vector<std::pair<edm::RefToBase<reco::Track>, double> >) simRecColl[trpart];
@@ -387,6 +330,7 @@ L2seedsAnalyzer::findAstaMuon(TrackingParticleRef trpart, reco::SimToRecoCollect
             }
             foundAmatch = true;
         }
+
     //3) now that we have the STA with the best quality, check its purity
         double purity = -1.;
         if(recSimColl.find(theBestQualitySTA) != recSimColl.end()) {
@@ -395,18 +339,20 @@ L2seedsAnalyzer::findAstaMuon(TrackingParticleRef trpart, reco::SimToRecoCollect
                  ITS != recSimAsso.end(); ++ITS) {
                 TrackingParticleRef tp = ITS->first;
                 if (tp == trpart) purity = ITS->second;
-                cout << foundAmatch<< endl;
+                //cout << foundAmatch<< endl;
 
             }
         }
-        if (foundAmatch) *theSTAMuon= theBestQualitySTA;
-        cout <<theSTAMuon->
-        cout << "purity=" << purity <<  endl;
+        //if (foundAmatch) *theSTAMuon= theBestQualitySTA;
+    //    if (foundAmatch) cout <<(theBestQualitySTA)->pt() << endl;
+        //cout << "purity=" << purity <<  endl;
+        *theMatchPurity = purity;
     }
      /*       // find the purity from RecoToSim association (set purity = -1 for unmatched recoToSim)
            */
-    
-    return foundAmatch;
+    *trackFound = foundAmatch;
+    *theMatchQuality = bestQuality;
+    return theBestQualitySTA;
 }
 
 // ------------ method called once each job just after ending the event loop  ------------

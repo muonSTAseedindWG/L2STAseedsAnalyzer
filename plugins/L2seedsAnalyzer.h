@@ -106,8 +106,7 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       virtual void endJob() override;
       virtual void beginEvent();
       virtual void endEvent();
-    
-    virtual bool findAstaMuon(TrackingParticleRef, reco::SimToRecoCollection, reco::RecoToSimCollection, edm::RefToBase<reco::Track>*);
+      virtual edm::RefToBase<reco::Track> findAstaMuon(TrackingParticleRef, reco::SimToRecoCollection, reco::RecoToSimCollection, bool*, float *, float*);
 
 
       //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
