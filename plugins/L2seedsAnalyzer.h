@@ -60,6 +60,8 @@ using namespace std;
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
 
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/Records/interface/TransientRecHitRecord.h"
+#include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHitBuilder.h"
 #include "DataFormats/TrajectorySeed/interface/TrajectorySeedCollection.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "RecoMuon/TrackingTools/interface/MuonPatternRecoDumper.h"
@@ -67,7 +69,7 @@ using namespace std;
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/RecoCandidate/interface/TrackAssociation.h"
-
+#include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
 
 // root stuff 
 #include "TH1D.h"
@@ -87,7 +89,9 @@ using namespace std;
 // Usefull typedef
 //
 typedef std::vector<edm::InputTag> vtag;
-
+/*typedef edm::OwnVector<TrackingRecHit> recHitContainer;
+typedef recHitContainer::const_iterator const_iterator;
+typedef std::pair<const_iterator,const_iterator> range;*/
 
 //
 // class declaration
@@ -121,6 +125,8 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       std::string theSTAMuonLabel_;
       edm::InputTag standAloneAssociatorTag_;
       edm::InputTag trackingParticlesTag_;
+      edm::InputTag L2seedsTag_;
+      std::string theMuonRecHitBuilderName_;
     
       // Tree and outfile
       // root file to store histograms

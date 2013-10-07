@@ -29,16 +29,24 @@ process.muonAssociatorByHits.UseMuon = cms.bool(True)
 process.muonAssociatorByHits.PurityCut_muon = cms.double(0.01)
 process.muonAssociatorByHits.EfficiencyCut_muon = cms.double(0.01)
 
-#process.load("SimGeneral.TrackingAnalysis.trackingParticles_cfi")
-#process.load("SimGeneral.MixingModule.trackingTruthProducer_cfi")
+import SimMuon.MCTruth.MuonAssociatorByHits_cfi
+
+process.muonAssociatorByHitsL2seeds = process.muonAssociatorByHits.clone() #don't use it, it is not working ;)
+process.muonAssociatorByHitsL2seeds.tracksTag = cms.InputTag("ancientMuonSeed")
+process.muonAssociatorByHitsL2seeds.UseTracker = cms.bool(False)
+process.muonAssociatorByHitsL2seeds.UseMuon = cms.bool(True)
+process.muonAssociatorByHitsL2seeds.PurityCut_muon = cms.double(0.01)
+process.muonAssociatorByHitsL2seeds.EfficiencyCut_muon = cms.double(0.01)
 
 process.runL2seed = cms.EDAnalyzer('L2seedsAnalyzer',
                               isMC                    = cms.bool(True),
                               muonProducer 		= cms.VInputTag(cms.InputTag("muons")),
                               primaryVertexInputTag   	= cms.InputTag("offlinePrimaryVertices"),
-                              StandAloneTrackCollectionLabel = cms.untracked.string('standAloneMuons'),
+                              StandAloneTrackCollectionLabel = cms.untracked.string("standAloneMuons"),
                               trackingParticlesCollection = cms.InputTag("mix","MergedTrackTruth"),
                               standAloneAssociator = cms.InputTag("muonAssociatorByHits"),
+                              L2seedsCollection = cms.InputTag("ancientMuonSeed"),
+                              MuonRecHitBuilder = cms.string("MuonRecHitBuilder"),
                               outputFile = cms.string("muonSeedTree.root")
 )
 

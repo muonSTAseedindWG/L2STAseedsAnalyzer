@@ -11,6 +11,8 @@ L2seedsAnalyzer::L2seedsAnalyzer(const edm::ParameterSet& iConfig)
     theSTAMuonLabel_ = iConfig.getUntrackedParameter<std::string>("StandAloneTrackCollectionLabel");
     standAloneAssociatorTag_ = iConfig.getParameter<edm::InputTag>("standAloneAssociator");
     trackingParticlesTag_ =  iConfig.getParameter<edm::InputTag>("trackingParticlesCollection");
+    L2seedsTag_ =  iConfig.getParameter<edm::InputTag>("L2seedsCollection");
+    theMuonRecHitBuilderName_ = iConfig.getParameter<std::string>("MuonRecHitBuilder");
     outputFile_     = iConfig.getParameter<std::string>("outputFile");
     rootFile_       = TFile::Open(outputFile_.c_str(),"RECREATE");
 
@@ -97,7 +99,20 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if (TPCollectionH.isValid()) tPC   = *(TPCollectionH.product());
     else cout << "not found tracking particles collection" << endl;
 
-
+    
+   // now read the L2 seeds collection :
+    edm::Handle<TrajectorySeedCollection> L2seedsCollection;
+    iEvent.getByLabel(L2seedsTag_,L2seedsCollection);
+    const std::vector<TrajectorySeed>* L2seeds = 0;
+    if (L2seedsCollection.isValid()) L2seeds = L2seedsCollection.product();
+    else cout << "L2 seeds collection not found !! " << endl;
+    
+    cout << "size seeds=" << L2seeds->size() << endl;
+    
+    edm::ESHandle<TransientTrackingRecHitBuilder> theMuonRecHitBuilder;
+    iSetup.get<TransientRecHitRecord>().get(theMuonRecHitBuilderName_,theMuonRecHitBuilder);
+    
+    
     
     beginEvent();
     
@@ -221,6 +236,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                         T_Gen_Muon_StaPhi->push_back(theSTAMuon->phi());
                         T_Gen_Muon_FoundSTA->push_back(matchQuality);
                         T_Gen_Muon_FoundSTA->push_back(matchPurity);
+                      //  cout << "seed Direction=" << theSTAMuon->seedDirection()->
                     }
                     else T_Gen_Muon_FoundSTA->push_back(0);
                     
@@ -228,7 +244,29 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
             }
         }
     }
-    
+    // now try a loop on the seeds :
+    for (unsigned int i = 0; i < L2seeds->size() ; i++){
+        cout << "seed nb " << i << endl;
+        cout << "nHits=" << (L2seeds->at(i)).nHits() << endl;
+        int countRH = 0;
+        for(TrajectorySeed::recHitContainer::const_iterator itRecHits=(L2seeds->at(i)).recHits().first; itRecHits!=(L2seeds->at(i)).recHits().second; ++itRecHits, ++countRH) {
+            if((*itRecHits).isValid()) {
+                TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(&(*itRecHits)));
+                cout << "phi=" << ttrh->globalPosition().phi() << endl;
+                cout << "eta=" << ttrh->globalPosition().eta() << endl;
+            }
+            /* cout << "coucou" << endl;
+            cout << "x=" << (*itRecHits).localPosition().x() << endl;
+            cout << "y=" << (*itRecHits).localPosition().y() << endl;
+            cout << "z=" << (*itRecHits).localPosition().z() << endl;*/
+        }
+        
+        cout << "on a vu " << countRH << " hits " << endl;
+       /* range rangeHits = (L2seeds->at(i)).recHits();
+        const_iterator firstRH = rangeHits.first();
+        cout << "sizeRH=" << firstRH->size() << endl;*/
+
+    }
     
     mytree_->Fill();
     
