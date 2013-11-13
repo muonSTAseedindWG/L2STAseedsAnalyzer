@@ -71,6 +71,8 @@ using namespace std;
 #include "DataFormats/RecoCandidate/interface/TrackAssociation.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
 
+#include "SimDataFormats/TrackingHit/interface/PSimHit.h" 
+
 // root stuff 
 #include "TH1D.h"
 #include <map>
@@ -110,7 +112,7 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       virtual void endJob() override;
       virtual void beginEvent();
       virtual void endEvent();
-      virtual edm::RefToBase<reco::Track> findAstaMuon(TrackingParticleRef, reco::SimToRecoCollection, reco::RecoToSimCollection, bool*, float *, float*);
+      virtual edm::RefToBase<reco::Track> findAstaMuon(TrackingParticleRef, reco::SimToRecoCollection, reco::RecoToSimCollection, bool*, float *, float*, const edm::EventSetup&);
 
 
       //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
@@ -126,6 +128,8 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       edm::InputTag standAloneAssociatorTag_;
       edm::InputTag trackingParticlesTag_;
       edm::InputTag L2seedsTag_;
+      edm::InputTag L2associatorTag_;
+      edm::InputTag L2seedTrackCollectionTag_;
       std::string theMuonRecHitBuilderName_;
     
       // Tree and outfile
@@ -199,8 +203,16 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     std::vector<float> *T_Gen_Muon_StaPt;
     std::vector<float> *T_Gen_Muon_StaEta;
     std::vector<float> *T_Gen_Muon_StaPhi;
+    std::vector<float> *T_Gen_Muon_StaSeedEta;
+    std::vector<float> *T_Gen_Muon_StaSeedPhi;
     std::vector<float> *T_Gen_Muon_StaPurity;
     std::vector<float> *T_Gen_Muon_StaQuality;
+    
+    std::vector<int> *T_Gen_Muon_FoundL2;
+    std::vector<float> *T_Gen_Muon_L2Eta;
+    std::vector<float> *T_Gen_Muon_L2Phi;
+    std::vector<float> *T_Gen_Muon_L2Purity;
+    std::vector<float> *T_Gen_Muon_L2Quality;
     
     
 };

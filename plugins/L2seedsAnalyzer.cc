@@ -12,6 +12,8 @@ L2seedsAnalyzer::L2seedsAnalyzer(const edm::ParameterSet& iConfig)
     standAloneAssociatorTag_ = iConfig.getParameter<edm::InputTag>("standAloneAssociator");
     trackingParticlesTag_ =  iConfig.getParameter<edm::InputTag>("trackingParticlesCollection");
     L2seedsTag_ =  iConfig.getParameter<edm::InputTag>("L2seedsCollection");
+    L2associatorTag_ = iConfig.getParameter<edm::InputTag>("L2associator");
+    L2seedTrackCollectionTag_ = iConfig.getParameter<edm::InputTag>("L2seedTrackCollection");
     theMuonRecHitBuilderName_ = iConfig.getParameter<std::string>("MuonRecHitBuilder");
     outputFile_     = iConfig.getParameter<std::string>("outputFile");
     rootFile_       = TFile::Open(outputFile_.c_str(),"RECREATE");
@@ -40,6 +42,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
  //   using namespace std;
     using namespace reco;
     
+    
     //muon collection :
     
 	edm::Handle < std::vector <reco::Muon> > recoMuons;
@@ -64,6 +67,11 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
    // Handle<reco::TrackCollection> staTracks;
     edm::Handle<edm::View<reco::Track> > staTracks;
     iEvent.getByLabel(theSTAMuonLabel_, staTracks);
+    
+    
+    // L2 muons tracks
+    edm::Handle<edm::View<reco::Track> > SeedTracks;
+    iEvent.getByLabel(L2seedTrackCollectionTag_, SeedTracks);
     
     // gen particles
      edm::Handle <reco::GenParticleCollection> genParticles;
@@ -112,6 +120,30 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     edm::ESHandle<TransientTrackingRecHitBuilder> theMuonRecHitBuilder;
     iSetup.get<TransientRecHitRecord>().get(theMuonRecHitBuilderName_,theMuonRecHitBuilder);
     
+    
+    //sim to L2 seeds associator
+    edm::Handle<reco::SimToRecoCollection> L2simRecoHandle;
+    iEvent.getByLabel(L2associatorTag_,L2simRecoHandle);
+    
+    reco::SimToRecoCollection L2simRecColl;
+    if (L2simRecoHandle.isValid()) {
+        L2simRecColl = *(L2simRecoHandle.product());
+    } else {
+        cout << "no valid sim RecHit product found ! " << endl;
+        return;
+    }
+    
+    //RECO to sim L2 seeds associator
+    edm::Handle<reco::RecoToSimCollection> L2recoSimHandle;
+    iEvent.getByLabel(L2associatorTag_,L2recoSimHandle);
+    
+    reco::RecoToSimCollection L2recSimColl;
+    if (L2recoSimHandle.isValid()) {
+        L2recSimColl = *(L2recoSimHandle.product());
+    } else {
+        cout << "no valid sim RecHit product found ! " << endl;
+        return;
+    }
     
     
     beginEvent();
@@ -224,49 +256,109 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                     T_Gen_Muon_tpPhi->push_back(trpart->phi());
                     // now look for a STD muon
                     //edm::RefToBase<reco::Track> *theSTAMuon = 0;
+                    
                     bool isTrackFound = false;
                     float matchQuality, matchPurity;
-                    edm::RefToBase<reco::Track> theSTAMuon = findAstaMuon(trpart, simRecColl, recSimColl, &isTrackFound, &matchQuality, &matchPurity);
-                  //  cout << "found=" << isTrackFound << " quality=" << matchQuality << " purity=" << matchPurity <<  endl;
-                   // if (isTrackFound) cout << "STA muon PT=" << (theSTAMuon)->pt() << endl;
+                    edm::RefToBase<reco::Track> theSTAMuon = findAstaMuon(trpart, simRecColl, recSimColl, &isTrackFound, &matchQuality, &matchPurity, iSetup);
+                    /*cout << "found=" << isTrackFound << " quality=" << matchQuality << " purity=" << matchPurity <<  endl;
+                    if (isTrackFound) cout << "STA muon PT=" << (theSTAMuon)->pt() << endl;
+                    if (isTrackFound) cout << "STA muon eta=" << (theSTAMuon)->eta() << " phi=" << (theSTAMuon)->phi() << endl;*/
                     if (isTrackFound) {
                         T_Gen_Muon_FoundSTA->push_back(1);
                         T_Gen_Muon_StaPt->push_back(theSTAMuon->pt());
                         T_Gen_Muon_StaEta->push_back(theSTAMuon->eta());
                         T_Gen_Muon_StaPhi->push_back(theSTAMuon->phi());
-                        T_Gen_Muon_FoundSTA->push_back(matchQuality);
+                        T_Gen_Muon_StaPurity->push_back(matchQuality);
                         T_Gen_Muon_FoundSTA->push_back(matchPurity);
-                      //  cout << "seed Direction=" << theSTAMuon->seedDirection()->
+                        TrajectorySeed theSeed = (*theSTAMuon->seedRef());
+                        const TrackingRecHit *seghit = &(*(theSeed.recHits().first));
+                        TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(seghit));
+                        T_Gen_Muon_StaSeedEta->push_back(ttrh->globalPosition().eta());
+                        T_Gen_Muon_StaSeedPhi->push_back(ttrh->globalPosition().phi());
+                        cout << "found a STA with seed = Eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi() << endl;
                     }
-                    else T_Gen_Muon_FoundSTA->push_back(0);
+                    else {
+                        T_Gen_Muon_FoundSTA->push_back(0);
+                        T_Gen_Muon_StaPt->push_back(-1);
+                        T_Gen_Muon_StaEta->push_back(-1);
+                        T_Gen_Muon_StaPhi->push_back(-1);
+                        T_Gen_Muon_StaPurity->push_back(-1);
+                        T_Gen_Muon_StaQuality->push_back(-1);
+                        T_Gen_Muon_StaSeedEta->push_back(-1);
+                        T_Gen_Muon_StaSeedPhi->push_back(-1);
+                    }
                     
+                    bool isL2seedFound = false;
+                    float matchQualityL2, matchPurityL2;
+                    edm::RefToBase<reco::Track> theL2seed = findAstaMuon(trpart, L2simRecColl, L2recSimColl, &isL2seedFound, &matchQualityL2, &matchPurityL2, iSetup);
+                    if (isL2seedFound){
+                        T_Gen_Muon_FoundL2->push_back(1);
+                        TrajectorySeed theSeed = (*theL2seed->seedRef());
+                        const TrackingRecHit *seghit = &(*(theSeed.recHits().first));
+                        TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(seghit));
+                        //cout << "phi=" << ttrh->globalPosition().phi() << endl;
+                        //cout << "eta=" << ttrh->globalPosition().eta() << endl;
+                        T_Gen_Muon_L2Eta->push_back(ttrh->globalPosition().eta());
+                        T_Gen_Muon_L2Phi->push_back(ttrh->globalPosition().phi());
+                        cout << "found a L2  seed = Eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi() << endl;
+                        T_Gen_Muon_L2Purity->push_back(matchPurityL2);
+                        T_Gen_Muon_L2Quality->push_back(matchPurityL2);
+                    }
+                    else {
+                        T_Gen_Muon_FoundL2->push_back(0);
+                        T_Gen_Muon_L2Eta->push_back(-1);
+                        T_Gen_Muon_L2Phi->push_back(-1);
+                        T_Gen_Muon_L2Purity->push_back(-1);
+                        T_Gen_Muon_L2Quality->push_back(-1);
+                    }
                 }
             }
         }
     }
     // now try a loop on the seeds :
-    for (unsigned int i = 0; i < L2seeds->size() ; i++){
+  /*  for (unsigned int i = 0; i < L2seeds->size() ; i++){
         cout << "seed nb " << i << endl;
         cout << "nHits=" << (L2seeds->at(i)).nHits() << endl;
+        unsigned int index_hit = 0;
+        // try to create a track from the seed
+        //reco::TrackCollection seedTrack;
+        //reco::TrackExtra* newTrk;
         int countRH = 0;
+        
         for(TrajectorySeed::recHitContainer::const_iterator itRecHits=(L2seeds->at(i)).recHits().first; itRecHits!=(L2seeds->at(i)).recHits().second; ++itRecHits, ++countRH) {
-            if((*itRecHits).isValid()) {
-                TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(&(*itRecHits)));
+            //seedTrack.push_back(itRecHits);
+            const TrackingRecHit *seghit = &(*itRecHits);
+            
+            //newTrk->add(seghit);
+                 if((*seghit).isValid()) {
+                TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(seghit));
                 cout << "phi=" << ttrh->globalPosition().phi() << endl;
                 cout << "eta=" << ttrh->globalPosition().eta() << endl;
             }
+            index_hit++;*/
             /* cout << "coucou" << endl;
             cout << "x=" << (*itRecHits).localPosition().x() << endl;
             cout << "y=" << (*itRecHits).localPosition().y() << endl;
             cout << "z=" << (*itRecHits).localPosition().z() << endl;*/
-        }
-        
+          /*  for (TrackingParticleCollection::size_type i=0; i<tPC.size(); i++) {
+                TrackingParticleRef trpart(TPCollectionH, i);
+                if (fabs(trpart->pt()-100) > 1) continue; //just for dev purpose, will remove it after
+                cout << "Tracking Particle: phi=" << trpart->phi() << " eta=" << trpart->eta() << "pt=" << trpart->pt() << endl;
+                TrackingParticle theOne = tPC[i];
+                //vector<PSimHit> pSimHit = theOne->trackPSimHit(DetId::Muon);
+                cout << "on a " << theOne.numberOfHits()  << "en tout dont " << theOne.numberOfTrackerHits() << "dans le tracker"  << endl;
+                for (TrackingParticle::g4t_iterator g4T=theOne.g4Track_begin(); g4T!=theOne.g4Track_end(); g4T++) {
+                    cout <<"Id:"<<g4T->trackId()<<"/Evt:("<<g4T->eventId().event()<<","<<g4T->eventId().bunchCrossing()<<")" << endl;
+                }*/
+            //}
+      /*  }
+        //newTrk->hitPattern().printHitPattern(index_hit, std::cout);
         cout << "on a vu " << countRH << " hits " << endl;
        /* range rangeHits = (L2seeds->at(i)).recHits();
         const_iterator firstRH = rangeHits.first();
         cout << "sizeRH=" << firstRH->size() << endl;*/
 
-    }
+   // }*
     
     mytree_->Fill();
     
@@ -340,6 +432,13 @@ L2seedsAnalyzer::beginJob()
         mytree_->Branch("T_Gen_Muon_StaPhi", "std::vector<float>", &T_Gen_Muon_StaPhi);
         mytree_->Branch("T_Gen_Muon_StaPurity", "std::vector<float>", &T_Gen_Muon_StaPurity);
         mytree_->Branch("T_Gen_Muon_StaQuality", "std::vector<float>", &T_Gen_Muon_StaQuality);
+        mytree_->Branch("T_Gen_Muon_StaSeedEta", "std::vector<float>", &T_Gen_Muon_StaSeedEta);
+        mytree_->Branch("T_Gen_Muon_StaSeedPhi", "std::vector<float>", &T_Gen_Muon_StaSeedPhi);
+        mytree_->Branch("T_Gen_Muon_FoundL2", "std::vector<int>", &T_Gen_Muon_FoundL2);
+        mytree_->Branch("T_Gen_Muon_L2Eta", "std::vector<float>", &T_Gen_Muon_L2Eta);
+        mytree_->Branch("T_Gen_Muon_L2Phi", "std::vector<float>", &T_Gen_Muon_L2Phi);
+        mytree_->Branch("T_Gen_Muon_L2Purity", "std::vector<float>", &T_Gen_Muon_L2Purity);
+        mytree_->Branch("T_Gen_Muon_L2Quality", "std::vector<float>", &T_Gen_Muon_L2Quality);
     }
 
 
@@ -347,8 +446,12 @@ L2seedsAnalyzer::beginJob()
 
 
 edm::RefToBase<reco::Track>
-L2seedsAnalyzer::findAstaMuon(TrackingParticleRef trpart, reco::SimToRecoCollection simRecColl, reco::RecoToSimCollection recSimColl, bool *trackFound, float *theMatchQuality, float *theMatchPurity){
+L2seedsAnalyzer::findAstaMuon(TrackingParticleRef trpart, reco::SimToRecoCollection simRecColl, reco::RecoToSimCollection recSimColl, bool *trackFound, float *theMatchQuality, float *theMatchPurity, const edm::EventSetup& iSetup){
+    edm::ESHandle<TransientTrackingRecHitBuilder> theLocalMuonRecHitBuilder;
+    iSetup.get<TransientRecHitRecord>().get(theMuonRecHitBuilderName_,theLocalMuonRecHitBuilder);
+    
     //1) find the STA muons if there is.
+    cout << "matching in progress" << endl;
     bool foundAmatch=false;
     edm::RefToBase<reco::Track> theBestQualitySTA; //will store the STA with the best quality !
     float bestQuality=0; //initial value
@@ -362,6 +465,10 @@ L2seedsAnalyzer::findAstaMuon(TrackingParticleRef trpart, reco::SimToRecoCollect
            // cout << "inside !! " << endl;
             edm::RefToBase<reco::Track> track = IT->first;
             double quality = IT->second;
+            TrajectorySeed theSeed = (*track->seedRef());
+            const TrackingRecHit *seghit = &(*(theSeed.recHits().first));
+            TransientTrackingRecHit::ConstRecHitPointer ttrh(theLocalMuonRecHitBuilder->build(seghit));
+            cout << "candidate eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi() << " quality=" << quality << endl;
             if (quality>bestQuality){
                 bestQuality=quality;
                 theBestQualitySTA = track;
@@ -392,6 +499,8 @@ L2seedsAnalyzer::findAstaMuon(TrackingParticleRef trpart, reco::SimToRecoCollect
     *theMatchQuality = bestQuality;
     return theBestQualitySTA;
 }
+
+
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
@@ -457,9 +566,16 @@ L2seedsAnalyzer::beginEvent()
     T_Gen_Muon_StaPt = new std::vector<float>;
     T_Gen_Muon_StaEta = new std::vector<float>;
     T_Gen_Muon_StaPhi = new std::vector<float>;
+    T_Gen_Muon_StaSeedEta = new std::vector<float>;
+    T_Gen_Muon_StaSeedPhi = new std::vector<float>;
     T_Gen_Muon_StaPurity = new std::vector<float>;
     T_Gen_Muon_StaQuality = new std::vector<float>;
-   
+    T_Gen_Muon_FoundL2 = new std::vector<int>;
+    T_Gen_Muon_L2Eta = new std::vector<float>;
+    T_Gen_Muon_L2Phi = new std::vector<float>;
+    T_Gen_Muon_L2Purity = new std::vector<float>;
+    T_Gen_Muon_L2Quality = new std::vector<float>;
+
     
     
 }
@@ -521,8 +637,16 @@ L2seedsAnalyzer::endEvent()
     delete T_Gen_Muon_StaPt;
     delete T_Gen_Muon_StaEta;
     delete T_Gen_Muon_StaPhi;
+    delete T_Gen_Muon_StaSeedEta;
+    delete T_Gen_Muon_StaSeedPhi;
     delete T_Gen_Muon_StaPurity;
     delete T_Gen_Muon_StaQuality;
+    delete T_Gen_Muon_FoundL2;
+    delete T_Gen_Muon_L2Eta;
+    delete T_Gen_Muon_L2Phi;
+    delete T_Gen_Muon_L2Purity;
+    delete T_Gen_Muon_L2Quality;
+    
 
     
 }
