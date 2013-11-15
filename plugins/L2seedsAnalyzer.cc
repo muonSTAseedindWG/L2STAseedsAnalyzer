@@ -115,7 +115,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if (L2seedsCollection.isValid()) L2seeds = L2seedsCollection.product();
     else cout << "L2 seeds collection not found !! " << endl;
     
-    cout << "size seeds=" << L2seeds->size() << endl;
+    //cout << "size seeds=" << L2seeds->size() << endl;
     
     edm::ESHandle<TransientTrackingRecHitBuilder> theMuonRecHitBuilder;
     iSetup.get<TransientRecHitRecord>().get(theMuonRecHitBuilderName_,theMuonRecHitBuilder);
@@ -243,7 +243,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         int nbOfGen = genParticles->size();
         for (int j = 0 ; j < nbOfGen ; j++){
             const reco::GenParticle & theCand = (*genParticles)[j];
-            cout << "gen muon:  eta=" << theCand.eta() << ", " << theCand.phi() << ", pt=" << theCand.pt() << endl;
+        //    cout << "gen muon:  eta=" << theCand.eta() << ", " << theCand.phi() << ", pt=" << theCand.pt() << endl;
             T_Gen_Muon_Px->push_back(theCand.px());
             T_Gen_Muon_Py->push_back(theCand.py());
             T_Gen_Muon_Pz->push_back(theCand.pz());
@@ -308,8 +308,8 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                        // cout << "eta=" << ttrh->globalPosition().eta() << endl;
                         T_Gen_Muon_L2Eta->push_back(ttrh->globalPosition().eta());
                         T_Gen_Muon_L2Phi->push_back(ttrh->globalPosition().phi());
-                        cout << "found a L2  seed = Eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi() << endl;
-                        cout << "Pt=" << theSeed.startingState().parameters().momentum().perp() << endl;
+                        //cout << "found a L2  seed = Eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi() << endl;
+                       // cout << "Pt=" << theSeed.startingState().parameters().momentum().perp() << endl;
 
                         T_Gen_Muon_L2Purity->push_back(matchPurityL2);
                         T_Gen_Muon_L2Quality->push_back(matchPurityL2);
@@ -328,7 +328,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                         TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(seghit));
                         float dRseed = deltaR(ttrh->globalPosition().phi(), theCand.phi(), ttrh->globalPosition().eta(), theCand.eta());
                         if (dRseed<0.5) foundACrudeMatching = true;
-                        cout << "dRseed" << dRseed << endl;
+                        //cout << "dRseed" << dRseed << endl;
                     }
                     if (foundACrudeMatching) T_Gen_Muon_L2crudeMaching->push_back(1);
                     else T_Gen_Muon_L2crudeMaching->push_back(0);
@@ -481,7 +481,7 @@ L2seedsAnalyzer::findAstaMuon(TrackingParticleRef trpart, reco::SimToRecoCollect
     iSetup.get<TransientRecHitRecord>().get(theMuonRecHitBuilderName_,theLocalMuonRecHitBuilder);
     
     //1) find the STA muons if there is.
-    cout << "matching in progress" << endl;
+    //cout << "matching in progress" << endl;
     bool foundAmatch=false;
     edm::RefToBase<reco::Track> theBestQualitySTA; //will store the STA with the best quality !
     float bestQuality=0; //initial value
@@ -498,7 +498,7 @@ L2seedsAnalyzer::findAstaMuon(TrackingParticleRef trpart, reco::SimToRecoCollect
             TrajectorySeed theSeed = (*track->seedRef());
             const TrackingRecHit *seghit = &(*(theSeed.recHits().first));
             TransientTrackingRecHit::ConstRecHitPointer ttrh(theLocalMuonRecHitBuilder->build(seghit));
-            cout << "candidate eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi() << " quality=" << quality << endl;
+            //cout << "candidate eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi() << " quality=" << quality << endl;
             if (quality>bestQuality){
                 bestQuality=quality;
                 theBestQualitySTA = track;
