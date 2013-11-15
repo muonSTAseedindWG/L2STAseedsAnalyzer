@@ -113,7 +113,8 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       virtual void beginEvent();
       virtual void endEvent();
       virtual edm::RefToBase<reco::Track> findAstaMuon(TrackingParticleRef, reco::SimToRecoCollection, reco::RecoToSimCollection, bool*, float *, float*, const edm::EventSetup&);
-
+      virtual float deltaR(float, float, float, float);
+      virtual float deltaPhi(float, float);
 
       //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
       //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
@@ -213,6 +214,9 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     std::vector<float> *T_Gen_Muon_L2Phi;
     std::vector<float> *T_Gen_Muon_L2Purity;
     std::vector<float> *T_Gen_Muon_L2Quality;
+    
+    std::vector<int> *T_Gen_Muon_L2crudeMaching;
+
     
     
 };

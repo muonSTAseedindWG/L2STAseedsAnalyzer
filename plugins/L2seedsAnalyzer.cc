@@ -163,7 +163,14 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     }
     
     T_Event_EventNumber = iEvent.id().event();
-
+    
+   /* int checkEvents[1] = {5709};
+    bool goodEvent = false;
+    for (int i = 0 ; i < 1 ; i++){
+        if (T_Event_EventNumber == checkEvents[i]) goodEvent = true;
+    }
+    if (!(goodEvent)) return;*/
+    //cout << "event=" << T_Event_EventNumber << endl;
 
     int nbMuons = recoMuons->size();
     //cout << "there are " << nbMuons << " muons in the event" << endl;
@@ -269,13 +276,14 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                         T_Gen_Muon_StaEta->push_back(theSTAMuon->eta());
                         T_Gen_Muon_StaPhi->push_back(theSTAMuon->phi());
                         T_Gen_Muon_StaPurity->push_back(matchQuality);
-                        T_Gen_Muon_FoundSTA->push_back(matchPurity);
+                        T_Gen_Muon_StaQuality->push_back(matchPurity);
                         TrajectorySeed theSeed = (*theSTAMuon->seedRef());
                         const TrackingRecHit *seghit = &(*(theSeed.recHits().first));
                         TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(seghit));
                         T_Gen_Muon_StaSeedEta->push_back(ttrh->globalPosition().eta());
                         T_Gen_Muon_StaSeedPhi->push_back(ttrh->globalPosition().phi());
-                        cout << "found a STA with seed = Eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi() << endl;
+                        //cout << "found a STA with seed = Eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi() << endl;
+                        //cout << "Pt=" << theSTAMuon->pt() << endl;
                     }
                     else {
                         T_Gen_Muon_FoundSTA->push_back(0);
@@ -297,10 +305,12 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                         const TrackingRecHit *seghit = &(*(theSeed.recHits().first));
                         TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(seghit));
                         //cout << "phi=" << ttrh->globalPosition().phi() << endl;
-                        //cout << "eta=" << ttrh->globalPosition().eta() << endl;
+                       // cout << "eta=" << ttrh->globalPosition().eta() << endl;
                         T_Gen_Muon_L2Eta->push_back(ttrh->globalPosition().eta());
                         T_Gen_Muon_L2Phi->push_back(ttrh->globalPosition().phi());
                         cout << "found a L2  seed = Eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi() << endl;
+                        cout << "Pt=" << theSeed.startingState().parameters().momentum().perp() << endl;
+
                         T_Gen_Muon_L2Purity->push_back(matchPurityL2);
                         T_Gen_Muon_L2Quality->push_back(matchPurityL2);
                     }
@@ -311,12 +321,23 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                         T_Gen_Muon_L2Purity->push_back(-1);
                         T_Gen_Muon_L2Quality->push_back(-1);
                     }
+                    /// now perform a crude matching
+                    int foundACrudeMatching = false;
+                    for (unsigned int i = 0; i < L2seeds->size() ; i++){
+                        const TrackingRecHit *seghit = &(*((L2seeds->at(i)).recHits().first));
+                        TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(seghit));
+                        float dRseed = deltaR(ttrh->globalPosition().phi(), theCand.phi(), ttrh->globalPosition().eta(), theCand.eta());
+                        if (dRseed<0.5) foundACrudeMatching = true;
+                        cout << "dRseed" << dRseed << endl;
+                    }
+                    if (foundACrudeMatching) T_Gen_Muon_L2crudeMaching->push_back(1);
+                    else T_Gen_Muon_L2crudeMaching->push_back(0);
                 }
             }
         }
     }
     // now try a loop on the seeds :
-  /*  for (unsigned int i = 0; i < L2seeds->size() ; i++){
+  /* for (unsigned int i = 0; i < L2seeds->size() ; i++){
         cout << "seed nb " << i << endl;
         cout << "nHits=" << (L2seeds->at(i)).nHits() << endl;
         unsigned int index_hit = 0;
@@ -360,6 +381,14 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
    // }*
     
+  /*  cout << "nbEvent in T_Gen_Muon_FoundSTA=" << T_Gen_Muon_FoundSTA->size() << endl;
+    for (unsigned int p=0 ; p < T_Gen_Muon_FoundSTA->size() ; p++){
+        cout << T_Gen_Muon_FoundSTA->at(p) << endl;
+    }
+    cout << "nbEvent in T_Gen_Muon_FoundL2=" << T_Gen_Muon_FoundL2->size() << endl;
+    for (unsigned int p=0 ; p < T_Gen_Muon_FoundL2->size() ; p++){
+        cout << T_Gen_Muon_FoundL2->at(p) << endl;
+    }c*/
     mytree_->Fill();
     
     endEvent();
@@ -439,6 +468,7 @@ L2seedsAnalyzer::beginJob()
         mytree_->Branch("T_Gen_Muon_L2Phi", "std::vector<float>", &T_Gen_Muon_L2Phi);
         mytree_->Branch("T_Gen_Muon_L2Purity", "std::vector<float>", &T_Gen_Muon_L2Purity);
         mytree_->Branch("T_Gen_Muon_L2Quality", "std::vector<float>", &T_Gen_Muon_L2Quality);
+        mytree_->Branch("T_Gen_Muon_L2crudeMaching", "std::vector<int>", &T_Gen_Muon_L2crudeMaching);
     }
 
 
@@ -575,6 +605,7 @@ L2seedsAnalyzer::beginEvent()
     T_Gen_Muon_L2Phi = new std::vector<float>;
     T_Gen_Muon_L2Purity = new std::vector<float>;
     T_Gen_Muon_L2Quality = new std::vector<float>;
+    T_Gen_Muon_L2crudeMaching = new std::vector<int>;
 
     
     
@@ -646,6 +677,7 @@ L2seedsAnalyzer::endEvent()
     delete T_Gen_Muon_L2Phi;
     delete T_Gen_Muon_L2Purity;
     delete T_Gen_Muon_L2Quality;
+    delete T_Gen_Muon_L2crudeMaching;
     
 
     
@@ -691,6 +723,25 @@ L2seedsAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) 
   edm::ParameterSetDescription desc;
   desc.setUnknown();
   descriptions.addDefault(desc);
+}
+
+float L2seedsAnalyzer::deltaR(float phi1, float phi2, float eta1, float eta2)
+{
+    float dphi=deltaPhi(phi1,phi2);
+    float deta=fabs(eta1-eta2);
+    float dr = sqrt(dphi*dphi+ deta*deta);
+    return dr;
+}
+
+float L2seedsAnalyzer::deltaPhi(float phi1, float phi2)
+{
+    float dphi;
+    if(phi1<0) phi1+=2*TMath::Pi();
+    if(phi2<0) phi2+=2*TMath::Pi();
+    dphi=fabs(phi1-phi2);
+    if(dphi>2*TMath::Pi()) dphi-=2*TMath::Pi();
+    if(dphi>TMath::Pi()) dphi=2*TMath::Pi()-dphi;
+    return dphi;
 }
 
 //define this as a plug-in
