@@ -17,8 +17,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
     fileNames = cms.untracked.vstring(
-				      '/store/relval/CMSSW_6_2_0_patch1/RelValSingleMuPt10/GEN-SIM-RECO/POSTLS162_V1_UPG2015-v1/00000/F83AEFDA-D7FA-E211-9019-00261894384A.root'
-                                      #'/store/relval/CMSSW_6_2_0/RelValSingleMuPt10/GEN-SIM-RECO/PRE_ST62_V8-v3/00000/FEB7D35C-5CEC-E211-80AA-003048FEB8EE.root'
+                                'file:/sps/cms/hbrun/CMSSW_6_2_0_patch1_L2seedingDev/src/files/NewGeometry_RECO.root'
+                            
     )
 )
 

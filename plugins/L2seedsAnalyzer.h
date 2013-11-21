@@ -73,6 +73,8 @@ using namespace std;
 
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h" 
 
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
+
 // root stuff 
 #include "TH1D.h"
 #include <map>
@@ -115,6 +117,8 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       virtual edm::RefToBase<reco::Track> findAstaMuon(TrackingParticleRef, reco::SimToRecoCollection, reco::RecoToSimCollection, bool*, float *, float*, const edm::EventSetup&);
       virtual float deltaR(float, float, float, float);
       virtual float deltaPhi(float, float);
+      virtual TrajectoryStateOnSurface seedTransientState(const TrajectorySeed&);
+
 
       //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
       //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
@@ -133,13 +137,17 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       edm::InputTag L2seedTrackCollectionTag_;
       std::string theMuonRecHitBuilderName_;
     
+      edm::ESHandle<MagneticField> theMGField;
+      edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry;
+
+    
       // Tree and outfile
       // root file to store histograms
       TFile*  rootFile_;
       std::string outputFile_; // output file name
      
       //Tree
-      TTree* mytree_;
+       TTree* mytree_;
     
 //variables to save in the tree
         //Event infos
@@ -216,7 +224,34 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     std::vector<float> *T_Gen_Muon_L2Quality;
     
     std::vector<int> *T_Gen_Muon_L2crudeMaching;
+    
+    //STA muon
+    
+    ///seed
 
+    std::vector<int> *T_Seed_Muon_nHits;
+    std::vector<float> *T_Seed_Muon_Eta;
+    std::vector<float> *T_Seed_Muon_Phi;
+    std::vector<float> *T_Seed_Muon_Pt;
+    std::vector<float> *T_Seed_Muon_Pz;
+    std::vector<float> *T_Seed_Muon_Px;
+    std::vector<float> *T_Seed_Muon_Py;
+    std::vector<float> *T_Seed_Muon_PxErr;
+    std::vector<float> *T_Seed_Muon_PyErr;
+    std::vector<float> *T_Seed_Muon_PzErr;
+    std::vector<float> *T_Seed_Muon_PtErr;
+    std::vector<float> *T_Seed_Muon_EtaErr;
+    std::vector<float> *T_Seed_Muon_PhiErr;
+    
+    // hits 
+    
+    
+    /*std::vector<int> *T_Seed_Muon_refFirstHit;
+    
+    std::vector<float> *T_Hits_Muon_L2Eta;
+    std::vector<float> *T_Hits_Muon_L2Phi;
+    std::vector<float> *T_Hits_Muon_localL2Eta;
+    std::vector<float> *T_Hits_Muon_localL2Phi;*/
     
     
 };

@@ -56,10 +56,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     
     
     // magnetic fied and detector geometry 
-    ESHandle<MagneticField> theMGField;
     iSetup.get<IdealMagneticFieldRecord>().get(theMGField);
-    
-    ESHandle<GlobalTrackingGeometry> theTrackingGeometry;
     iSetup.get<GlobalTrackingGeometryRecord>().get(theTrackingGeometry);
     
     
@@ -313,6 +310,10 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
                         T_Gen_Muon_L2Purity->push_back(matchPurityL2);
                         T_Gen_Muon_L2Quality->push_back(matchPurityL2);
+                        
+                        //get kinematic of the seed
+                       // const TrajectorySeed& theSeedRef = *theSeed;
+                        //TrajectoryStateOnSurface L2seedsAnalyzer::seedTransientState(theSeedRef);
                     }
                     else {
                         T_Gen_Muon_FoundL2->push_back(0);
@@ -321,6 +322,10 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                         T_Gen_Muon_L2Purity->push_back(-1);
                         T_Gen_Muon_L2Quality->push_back(-1);
                     }
+
+
+                    
+                    
                     /// now perform a crude matching
                     int foundACrudeMatching = false;
                     for (unsigned int i = 0; i < L2seeds->size() ; i++){
@@ -337,7 +342,30 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         }
     }
     // now try a loop on the seeds :
-  /* for (unsigned int i = 0; i < L2seeds->size() ; i++){
+    for(TrajectorySeedCollection::const_iterator seed = L2seeds->begin(); seed != L2seeds->end(); ++seed){
+        T_Seed_Muon_nHits->push_back(seed->nHits() );
+        TrajectoryStateOnSurface theTrajectory = seedTransientState(*seed);
+        T_Seed_Muon_Eta->push_back(theTrajectory.globalMomentum().eta());
+        T_Seed_Muon_Phi->push_back(theTrajectory.globalMomentum().phi());
+        T_Seed_Muon_EtaErr->push_back(theTrajectory.curvilinearError().matrix()(1,1));
+        T_Seed_Muon_PhiErr->push_back(theTrajectory.curvilinearError().matrix()(2,2));
+        T_Seed_Muon_Pt->push_back(theTrajectory.globalMomentum().perp());
+        T_Seed_Muon_Px->push_back(theTrajectory.globalMomentum().x());
+        T_Seed_Muon_Py->push_back(theTrajectory.globalMomentum().y());
+        T_Seed_Muon_Pz->push_back(theTrajectory.globalMomentum().z());
+        
+        AlgebraicSymMatrix66 errors = theTrajectory.cartesianError().matrix();
+        double partialPterror = errors(3,3)*pow(theTrajectory.globalMomentum().x(),2) + errors(4,4)*pow(theTrajectory.globalMomentum().y(),2);
+        T_Seed_Muon_PtErr->push_back(sqrt(partialPterror));
+        T_Seed_Muon_PxErr->push_back(sqrt(errors(3,3)));
+        T_Seed_Muon_PyErr->push_back(sqrt(errors(4,4)));
+        T_Seed_Muon_PzErr->push_back(sqrt(errors(5,5)));
+        
+
+        
+     }
+
+  /*for (unsigned int i = 0; i < L2seeds->size() ; i++){
         cout << "seed nb " << i << endl;
         cout << "nHits=" << (L2seeds->at(i)).nHits() << endl;
         unsigned int index_hit = 0;
@@ -345,6 +373,12 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         //reco::TrackCollection seedTrack;
         //reco::TrackExtra* newTrk;
         int countRH = 0;
+   202      for(TrajectorySeedCollection::const_iterator seed = seeds->begin(); seed != seeds->end(); ++seed){
+   203        if(theSeedsAnalyzerFlag){
+   204          LogTrace(metname)<<"[MuonAnalyzer] Call to the seeds analyzer";
+   205          theSeedsAnalyzer->analyze(iEvent, iSetup, *seed);
+   206        }
+   207      }
         
         for(TrajectorySeed::recHitContainer::const_iterator itRecHits=(L2seeds->at(i)).recHits().first; itRecHits!=(L2seeds->at(i)).recHits().second; ++itRecHits, ++countRH) {
             //seedTrack.push_back(itRecHits);
@@ -439,6 +473,21 @@ L2seedsAnalyzer::beginJob()
     mytree_->Branch("T_Muon_trkError", "std::vector<float>", &T_Muon_trkError);
     mytree_->Branch("T_Muon_dB", "std::vector<float>", &T_Muon_dB);
     mytree_->Branch("T_Muon_dzPV", "std::vector<float>", &T_Muon_dzPV);
+    
+    
+    mytree_->Branch("T_Seed_Muon_nHits", "std::vector<int>", &T_Seed_Muon_nHits);
+    mytree_->Branch("T_Seed_Muon_Eta", "std::vector<float>", &T_Seed_Muon_Eta);
+    mytree_->Branch("T_Seed_Muon_Phi", "std::vector<float>", &T_Seed_Muon_Phi);
+    mytree_->Branch("T_Seed_Muon_Pt", "std::vector<float>", &T_Seed_Muon_Pt);
+    mytree_->Branch("T_Seed_Muon_Pz", "std::vector<float>", &T_Seed_Muon_Pz);
+    mytree_->Branch("T_Seed_Muon_Px", "std::vector<float>", &T_Seed_Muon_Px);
+    mytree_->Branch("T_Seed_Muon_Py", "std::vector<float>", &T_Seed_Muon_Py);
+    mytree_->Branch("T_Seed_Muon_PxErr", "std::vector<float>", &T_Seed_Muon_PxErr);
+    mytree_->Branch("T_Seed_Muon_PyErr", "std::vector<float>", &T_Seed_Muon_PyErr);
+    mytree_->Branch("T_Seed_Muon_PzErr", "std::vector<float>", &T_Seed_Muon_PzErr);
+    mytree_->Branch("T_Seed_Muon_PtErr", "std::vector<float>", &T_Seed_Muon_PtErr);
+    mytree_->Branch("T_Seed_Muon_EtaErr", "std::vector<float>", &T_Seed_Muon_EtaErr);
+    mytree_->Branch("T_Seed_Muon_PhiErr", "std::vector<float>", &T_Seed_Muon_PhiErr);
 
 
     if (isMC_){
@@ -530,6 +579,14 @@ L2seedsAnalyzer::findAstaMuon(TrackingParticleRef trpart, reco::SimToRecoCollect
     return theBestQualitySTA;
 }
 
+TrajectoryStateOnSurface L2seedsAnalyzer::seedTransientState(const TrajectorySeed& tmpSeed){
+
+    PTrajectoryStateOnDet tmpTSOD = tmpSeed.startingState();
+    DetId tmpDetId(tmpTSOD.detId());
+    const GeomDet* tmpGeomDet = theTrackingGeometry->idToDet(tmpDetId);
+    TrajectoryStateOnSurface tmpTSOS = trajectoryStateTransform::transientState(tmpTSOD, &(tmpGeomDet->surface()), &(*theMGField));
+    return tmpTSOS;
+}
 
 
 // ------------ method called once each job just after ending the event loop  ------------
@@ -578,6 +635,21 @@ L2seedsAnalyzer::beginEvent()
     T_Muon_trkError = new std::vector<float>;
     T_Muon_dB = new std::vector<float>;
     T_Muon_dzPV = new std::vector<float>;
+    
+    T_Seed_Muon_nHits = new std::vector<int>;
+    T_Seed_Muon_Eta = new std::vector<float>;
+    T_Seed_Muon_Phi = new std::vector<float>;
+    T_Seed_Muon_Pt = new std::vector<float>;
+    T_Seed_Muon_Pz = new std::vector<float>;
+    T_Seed_Muon_Px = new std::vector<float>;
+    T_Seed_Muon_Py = new std::vector<float>;
+    T_Seed_Muon_PxErr = new std::vector<float>;
+    T_Seed_Muon_PyErr = new std::vector<float>;
+    T_Seed_Muon_PzErr = new std::vector<float>;
+    T_Seed_Muon_PtErr = new std::vector<float>;
+    T_Seed_Muon_EtaErr = new std::vector<float>;
+    T_Seed_Muon_PhiErr = new std::vector<float>;
+
 
     T_Gen_Muon_Px = new std::vector<float>;
     T_Gen_Muon_Py = new std::vector<float>;
@@ -649,6 +721,20 @@ L2seedsAnalyzer::endEvent()
     delete T_Muon_trkError;
     delete T_Muon_dB;
     delete T_Muon_dzPV;
+    
+    delete T_Seed_Muon_nHits;
+    delete T_Seed_Muon_Eta;
+    delete T_Seed_Muon_Phi;
+    delete T_Seed_Muon_Pt;
+    delete T_Seed_Muon_Pz;
+    delete T_Seed_Muon_Px;
+    delete T_Seed_Muon_Py;
+    delete T_Seed_Muon_PxErr;
+    delete T_Seed_Muon_PyErr;
+    delete T_Seed_Muon_PzErr;
+    delete T_Seed_Muon_PtErr;
+    delete T_Seed_Muon_EtaErr;
+    delete T_Seed_Muon_PhiErr;
     
     
     delete T_Gen_Muon_Px;
