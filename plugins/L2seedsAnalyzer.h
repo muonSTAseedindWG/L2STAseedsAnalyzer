@@ -133,7 +133,7 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
       // ----------member data ---------------------------
-      bool isMC_; 
+      bool isMC_;
       vtag muonProducers_;
       edm::InputTag   primaryVertexInputTag_;
       std::string theSTAMuonLabel_;

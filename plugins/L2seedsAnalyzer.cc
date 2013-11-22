@@ -250,6 +250,19 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
             T_Gen_Muon_Energy->push_back(theCand.energy());
             T_Gen_Muon_PDGid->push_back(theCand.pdgId());
             T_Gen_Muon_status->push_back(theCand.status());
+        
+            int theMotherID = 0;
+            const reco::Candidate * theLocalCandidate = &theCand;
+            bool hasMother = (theLocalCandidate->numberOfMothers()>0);
+            const reco::Candidate * theMother;
+            while (hasMother) {//check if the muon has a J/Psi in its mother particles
+                theMother = theLocalCandidate->mother();
+                theLocalCandidate = theMother;
+                hasMother = (theLocalCandidate->numberOfMothers()>0);
+                theMotherID = theMother->pdgId();
+                if (theMother->pdgId()==443) break;
+            }
+            if (theMotherID!=443) continue;
             for (TrackingParticleCollection::size_type i=0; i<tPC.size(); i++) {
                 TrackingParticleRef trpart(TPCollectionH, i);
                 float deltaRtp = sqrt(pow(trpart->eta()-theCand.eta(),2)+ pow(acos(cos(trpart->phi()-theCand.phi())),2)) ;
