@@ -263,6 +263,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                 if (theMother->pdgId()==443) break;
             }
             if (theMotherID!=443) continue;
+            T_Gen_Muon_MotherID->push_back(theMotherID);
             for (TrackingParticleCollection::size_type i=0; i<tPC.size(); i++) {
                 TrackingParticleRef trpart(TPCollectionH, i);
                 float deltaRtp = sqrt(pow(trpart->eta()-theCand.eta(),2)+ pow(acos(cos(trpart->phi()-theCand.phi())),2)) ;
