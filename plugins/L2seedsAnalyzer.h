@@ -75,6 +75,13 @@ using namespace std;
 
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 
+#include "DataFormats/DetId/interface/DetId.h"
+#include "DataFormats/MuonDetId/interface/MuonSubdetId.h"
+ #include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "TrackingTools/DetLayers/interface/DetLayer.h"
+#include "RecoMuon/MeasurementDet/interface/MuonDetLayerMeasurements.h"
+#include "RecoMuon/DetLayers/interface/MuonDetLayerGeometry.h"
+#include "RecoMuon/Records/interface/MuonRecoGeometryRecord.h"
 // root stuff 
 #include "TH1D.h"
 #include <map>
@@ -230,6 +237,7 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     ///seed
 
     std::vector<int> *T_Seed_Muon_nHits;
+    std::vector<int> *T_Seed_Muon_refFirstHit;
     std::vector<float> *T_Seed_Muon_Eta;
     std::vector<float> *T_Seed_Muon_Phi;
     std::vector<float> *T_Seed_Muon_Pt;
@@ -243,15 +251,27 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     std::vector<float> *T_Seed_Muon_EtaErr;
     std::vector<float> *T_Seed_Muon_PhiErr;
     
-    // hits 
+    // hits
     
-    
-    /*std::vector<int> *T_Seed_Muon_refFirstHit;
     
     std::vector<float> *T_Hits_Muon_L2Eta;
     std::vector<float> *T_Hits_Muon_L2Phi;
-    std::vector<float> *T_Hits_Muon_localL2Eta;
-    std::vector<float> *T_Hits_Muon_localL2Phi;*/
+    std::vector<float> *T_Hits_Muon_localL2x;
+    std::vector<float> *T_Hits_Muon_localL2y;
+    std::vector<float> *T_Hits_Muon_localL2z;
+    std::vector<int> *T_Hits_Muon_isDT;
+    std::vector<int> *T_Hits_Muon_DTwire;
+    std::vector<int> *T_Hits_Muon_DTlayer;
+    std::vector<int> *T_Hits_Muon_DTsuperlayer;
+    std::vector<int> *T_Hits_Muon_DTWheel;
+    std::vector<int> *T_Hits_Muon_DTStation;
+    std::vector<int> *T_Hits_Muon_DTSector;
+    std::vector<int> *T_Hits_Muon_isCSC;
+    std::vector<int> *T_Hits_Muon_CSClayer;
+    std::vector<int> *T_Hits_Muon_CSCchamber;
+    std::vector<int> *T_Hits_Muon_CSCring;
+    std::vector<int> *T_Hits_Muon_CSCiChamberType;
+    
     
     
 };
