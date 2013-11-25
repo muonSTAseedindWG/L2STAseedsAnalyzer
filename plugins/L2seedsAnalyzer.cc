@@ -240,17 +240,6 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         int nbOfGen = genParticles->size();
         for (int j = 0 ; j < nbOfGen ; j++){
             const reco::GenParticle & theCand = (*genParticles)[j];
-        //    cout << "gen muon:  eta=" << theCand.eta() << ", " << theCand.phi() << ", pt=" << theCand.pt() << endl;
-            T_Gen_Muon_Px->push_back(theCand.px());
-            T_Gen_Muon_Py->push_back(theCand.py());
-            T_Gen_Muon_Pz->push_back(theCand.pz());
-            T_Gen_Muon_Pt->push_back(theCand.pt());
-            T_Gen_Muon_Phi->push_back(theCand.phi());
-            T_Gen_Muon_Eta->push_back(theCand.eta());
-            T_Gen_Muon_Energy->push_back(theCand.energy());
-            T_Gen_Muon_PDGid->push_back(theCand.pdgId());
-            T_Gen_Muon_status->push_back(theCand.status());
-        
             int theMotherID = 0;
             const reco::Candidate * theLocalCandidate = &theCand;
             bool hasMother = (theLocalCandidate->numberOfMothers()>0);
@@ -263,6 +252,18 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                 if (theMother->pdgId()==443) break;
             }
             if (theMotherID!=443) continue;
+            //cout << "gen muon:  eta=" << theCand.eta() << ", " << theCand.phi() << ", pt=" << theCand.pt() << endl;
+            T_Gen_Muon_Px->push_back(theCand.px());
+            T_Gen_Muon_Py->push_back(theCand.py());
+            T_Gen_Muon_Pz->push_back(theCand.pz());
+            T_Gen_Muon_Pt->push_back(theCand.pt());
+            T_Gen_Muon_Phi->push_back(theCand.phi());
+            T_Gen_Muon_Eta->push_back(theCand.eta());
+            T_Gen_Muon_Energy->push_back(theCand.energy());
+            T_Gen_Muon_PDGid->push_back(theCand.pdgId());
+            T_Gen_Muon_status->push_back(theCand.status());
+        
+	    //cout << "part=" << theCand.pdgId() << " motherID=" << theMotherID << endl;
             T_Gen_Muon_MotherID->push_back(theMotherID);
             for (TrackingParticleCollection::size_type i=0; i<tPC.size(); i++) {
                 TrackingParticleRef trpart(TPCollectionH, i);
