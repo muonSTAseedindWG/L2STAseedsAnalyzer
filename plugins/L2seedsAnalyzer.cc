@@ -287,8 +287,8 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                         T_Gen_Muon_StaPt->push_back(theSTAMuon->pt());
                         T_Gen_Muon_StaEta->push_back(theSTAMuon->eta());
                         T_Gen_Muon_StaPhi->push_back(theSTAMuon->phi());
-                        T_Gen_Muon_StaPurity->push_back(matchQuality);
-                        T_Gen_Muon_StaQuality->push_back(matchPurity);
+                        T_Gen_Muon_StaPurity->push_back(matchPurity);
+                        T_Gen_Muon_StaQuality->push_back(matchQuality);
                         TrajectorySeed theSeed = (*theSTAMuon->seedRef());
                         const TrackingRecHit *seghit = &(*(theSeed.recHits().first));
                         TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(seghit));
@@ -307,7 +307,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                         T_Gen_Muon_StaSeedEta->push_back(-1);
                         T_Gen_Muon_StaSeedPhi->push_back(-1);
                     }
-                    
+                    // now look if found a match with a L2 seed
                     bool isL2seedFound = false;
                     float matchQualityL2, matchPurityL2;
                     edm::RefToBase<reco::Track> theL2seed = findAstaMuon(trpart, L2simRecColl, L2recSimColl, &isL2seedFound, &matchQualityL2, &matchPurityL2, iSetup);
@@ -324,11 +324,8 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                        // cout << "Pt=" << theSeed.startingState().parameters().momentum().perp() << endl;
 
                         T_Gen_Muon_L2Purity->push_back(matchPurityL2);
-                        T_Gen_Muon_L2Quality->push_back(matchPurityL2);
+                        T_Gen_Muon_L2Quality->push_back(matchQualityL2);
                         
-                        //get kinematic of the seed
-                       // const TrajectorySeed& theSeedRef = *theSeed;
-                        //TrajectoryStateOnSurface L2seedsAnalyzer::seedTransientState(theSeedRef);
                     }
                     else {
                         T_Gen_Muon_FoundL2->push_back(0);
@@ -338,10 +335,8 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                         T_Gen_Muon_L2Quality->push_back(-1);
                     }
 
-
                     
-                    
-                    /// now perform a crude matching
+                    /// now perform a crude matching with a dR cone
                     int foundACrudeMatching = false;
                     for (unsigned int i = 0; i < L2seeds->size() ; i++){
                         const TrackingRecHit *seghit = &(*((L2seeds->at(i)).recHits().first));
@@ -352,6 +347,26 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                     }
                     if (foundACrudeMatching) T_Gen_Muon_L2crudeMaching->push_back(1);
                     else T_Gen_Muon_L2crudeMaching->push_back(0);
+                }
+                else //not found a tracking particle, fill all variables to -1 in order to have same nb of entries in TP and Gen particles trees...
+                 {
+                     T_Gen_Muon_tpPt->push_back(-1);
+                     T_Gen_Muon_tpEta->push_back(-1);
+                     T_Gen_Muon_tpPhi->push_back(-1);
+                     T_Gen_Muon_FoundSTA->push_back(0);
+                     T_Gen_Muon_StaPt->push_back(-1);
+                     T_Gen_Muon_StaEta->push_back(-1);
+                     T_Gen_Muon_StaPhi->push_back(-1);
+                     T_Gen_Muon_StaPurity->push_back(-1);
+                     T_Gen_Muon_StaQuality->push_back(-1);
+                     T_Gen_Muon_StaSeedEta->push_back(-1);
+                     T_Gen_Muon_StaSeedPhi->push_back(-1);
+                     T_Gen_Muon_FoundL2->push_back(0);
+                     T_Gen_Muon_L2Eta->push_back(-1);
+                     T_Gen_Muon_L2Phi->push_back(-1);
+                     T_Gen_Muon_L2Purity->push_back(-1);
+                     T_Gen_Muon_L2Quality->push_back(-1);
+                     T_Gen_Muon_L2crudeMaching->push_back(0);
                 }
             }
         }
