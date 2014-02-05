@@ -82,6 +82,12 @@ using namespace std;
 #include "RecoMuon/MeasurementDet/interface/MuonDetLayerMeasurements.h"
 #include "RecoMuon/DetLayers/interface/MuonDetLayerGeometry.h"
 #include "RecoMuon/Records/interface/MuonRecoGeometryRecord.h"
+
+#include "SimMuon/MCTruth/interface/MuonAssociatorByHits.h"
+#include "SimTracker/Records/interface/TrackAssociatorRecord.h"
+#include <SimDataFormats/TrackingAnalysis/interface/TrackingVertex.h>
+#include "CommonTools/Utils/interface/StringCutObjectSelector.h"
+
 // root stuff 
 #include "TH1D.h"
 #include <map>
@@ -134,6 +140,7 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
 
       // ----------member data ---------------------------
       bool isMC_;
+      bool isNotFullEventContent;
       vtag muonProducers_;
       edm::InputTag   primaryVertexInputTag_;
       std::string theSTAMuonLabel_;
@@ -143,6 +150,7 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       edm::InputTag L2associatorTag_;
       edm::InputTag L2seedTrackCollectionTag_;
       std::string theMuonRecHitBuilderName_;
+      std::string associatorLabel_;
     
       edm::ESHandle<MagneticField> theMGField;
       edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry;

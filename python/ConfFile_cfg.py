@@ -12,15 +12,54 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = 'PRE_ST62_V8::All'
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
     fileNames = cms.untracked.vstring(
-                                '/store/user/hbrun/samplesForSeedingStudies/CMSSW620/RelValSingleMuPt100_PRE_ST62_V8/reco_1.root'
-                            
-    )
+                                #'/store/user/hbrun/samplesForSeedingStudies/CMSSW620/RelValSingleMuPt100_PRE_ST62_V8/reco_1.root'
+#				'/store/relval/CMSSW_6_2_0_patch1/RelValSingleMuPt100/GEN-SIM-RECO/POSTLS162_V1_UPG2015-v1/00000/DE749C75-E3FA-E211-BC47-0026189437E8.root'
+                                 '/store/user/hbrun/recup_620MuSimsRAWRECO_v2/filesRecup/theRECOfile.root'                            
+    ),
 )
+
+process.load("FWCore.MessageService.MessageLogger_cfi")
+
+#process.MessageLogger.debugModules = cms.untracked.vstring("testanalyzer","muonAssociatorByHits","process.muonTrackProducer")
+
+process.MessageLogger.categories = cms.untracked.vstring('testReader', 'L2seedsAnalyzer')
+
+process.MessageLogger.cerr = cms.untracked.PSet(
+                                                noTimeStamps = cms.untracked.bool(True),
+                                                
+                                                threshold = cms.untracked.string('WARNING'),
+                                                
+                                                testReader = cms.untracked.PSet(
+                                                                                limit = cms.untracked.int32(0)
+                                                                                ),
+                                                L2seedsAnalyzer = cms.untracked.PSet(
+                                                                                     limit = cms.untracked.int32(0)
+                                                                                     )
+                                                )
+
+process.MessageLogger.cout = cms.untracked.PSet(
+                                                noTimeStamps = cms.untracked.bool(True),
+                                                
+                                                #    threshold = cms.untracked.string('DEBUG'),
+                                                threshold = cms.untracked.string('INFO'),
+                                                
+                                                default = cms.untracked.PSet(
+                                                                             limit = cms.untracked.int32(0)
+                                                                             #     limit = cms.untracked.int32(10000000)
+                                                                             ),
+
+                                                L2seedsAnalyzer = cms.untracked.PSet(
+                                                                                     limit = cms.untracked.int32(0)
+                                                                                     )
+)
+
+process.MessageLogger.statistics = cms.untracked.vstring('cout')
+
 
 process.load("SimMuon.MCTruth.MuonAssociatorByHits_cfi")
 process.muonAssociatorByHits.tracksTag = cms.InputTag("standAloneMuons")
@@ -50,6 +89,8 @@ process.tpToGlbMuAssociation = cms.EDProducer('TrackAssociatorEDProducer',
                                               label_tr = cms.InputTag('globalMuons')
                                               )
 
+
+process.load("SimMuon.MCTruth.MuonAssociatorByHitsESProducer_NoSimHits_cfi") 
 process.runL2seed = cms.EDAnalyzer('L2seedsAnalyzer',
                               isMC                    = cms.bool(True),
                               muonProducer 		= cms.VInputTag(cms.InputTag("muons")),
@@ -61,6 +102,7 @@ process.runL2seed = cms.EDAnalyzer('L2seedsAnalyzer',
                               L2seedTrackCollection = cms.InputTag("myProducerLabel"),
                               L2associator = cms.InputTag("muonAssociatorByHitsL2seeds"),
                               MuonRecHitBuilder = cms.string("MuonRecHitBuilder"),
+			      associatorLabel = cms.string("muonAssociatorByHits_NoSimHits"),
                               outputFile = cms.string("muonSeedTree.root")
 )
 
@@ -81,8 +123,37 @@ process.myProducerLabel = cms.EDProducer('SeedToTrackProducer',
                                          L2seedsCollection = cms.InputTag("ancientMuonSeed")
                                          )
 
-process.p = cms.Path(process.myProducerLabel*process.muonAssociatorByHitsL2seeds*process.muonAssociatorByHits+process.runL2seed)
-#process.outpath = cms.EndPath(process.out)
+process.load("SimGeneral.MixingModule.mixNoPU_cfi")
+
+import SimGeneral.MixingModule.trackingTruthProducer_cfi
+process.mergedtruthNoSimHits = process.trackingParticles.clone(
+                                                            simHitCollections = cms.PSet(
+                                                                                         muon = cms.VInputTag(),
+                                                                                         tracker = cms.VInputTag(),
+                                                                                         pixel = cms.VInputTag()
+                                                                                         )
+                                                            )
+
+process.mix.digitizers = cms.PSet( mergedtruth = process.mergedtruthNoSimHits )
+process.mix.mixObjects = cms.PSet()
+del process.simCastorDigis
+del process.simEcalUnsuppressedDigis
+del process.simHcalUnsuppressedDigis
+del process.simSiPixelDigis
+del process.simSiStripDigis
+
+process.out = cms.OutputModule("PoolOutputModule",
+                               outputCommands = cms.untracked.vstring(
+                                                                      'drop *',
+                                                                      'keep *_classByHitsTM_*_ALZ',
+                                                                      'keep *_myProducerLabel_*_ALZ',
+                                                                      'keep *_mix_*_ALZ'),
+                               fileName = cms.untracked.string('testRECOouput.root')
+                               )
+
+#process.p = cms.Path(process.myProducerLabel*process.muonAssociatorByHitsL2seeds*process.muonAssociatorByHits+process.runL2seed)
+process.p = cms.Path(process.myProducerLabel*process.mix*process.runL2seed)
+process.outpath = cms.EndPath(process.out)
 
 
 

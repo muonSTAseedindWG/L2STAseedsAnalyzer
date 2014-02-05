@@ -12,6 +12,8 @@
 <use   name="RecoEcal/EgammaCoreTools"/>
 <use   name="TrackingTools/IPTools"/>
 <use   name="CommonTools/Statistics"/>
+<use   name="DataFormats/PatCandidates"/>
+<use   name="CommonTools/Utils"/>
 <use   name="HLTrigger/HLTcore"/>
 <use   name="DataFormats/HLTReco"/>
 <use   name="MagneticField/Engine"/>
@@ -21,6 +23,21 @@
 <use   name="SimDataFormats/DigiSimLinks"/>
 <use   name="SimTracker/TrackerHitAssociation"/>
 <use   name="SimDataFormats/TrackingAnalysis"/>
+<use   name="TrackingTools/DetLayers"/>
+<use   name="TrackingTools/GeomPropagators"/>
+<use   name="TrackingTools/KalmanUpdators"/>
+<use   name="TrackingTools/PatternTools"/>
+<use   name="TrackingTools/Records"/>
+<use   name="TrackingTools/TrajectoryState"/>
+<use   name="SimDataFormats/Vertex"/>
+<use   name="SimMuon/MCTruth"/>
+<use   name="SimTracker/Records"/>
+<use   name="SimTracker/TrackAssociation"/>
+<use   name="MuonAnalysis/MuonAssociators"/>
 <use   name="clhep"/>
 <use   name="root"/>
 <flags EDM_PLUGIN="1"/>
+<export>
+</export>
+<library   name="MuonAnalysisMuonAssociators_plugins" file="*.cc">
+</library>
