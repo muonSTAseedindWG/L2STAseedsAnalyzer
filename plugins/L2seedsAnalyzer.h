@@ -140,6 +140,7 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
 
       // ----------member data ---------------------------
       bool isMC_;
+      bool isJPSIonly_;
       bool isNotFullEventContent;
       vtag muonProducers_;
       edm::InputTag   primaryVertexInputTag_;

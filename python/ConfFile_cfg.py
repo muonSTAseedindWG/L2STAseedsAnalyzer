@@ -19,7 +19,8 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
                                 #'/store/user/hbrun/samplesForSeedingStudies/CMSSW620/RelValSingleMuPt100_PRE_ST62_V8/reco_1.root'
 #				'/store/relval/CMSSW_6_2_0_patch1/RelValSingleMuPt100/GEN-SIM-RECO/POSTLS162_V1_UPG2015-v1/00000/DE749C75-E3FA-E211-BC47-0026189437E8.root'
-                                 '/store/user/hbrun/recup_620MuSimsRAWRECO_v2/filesRecup/theRECOfile.root'                            
+    #                             '/store/user/hbrun/recup_620MuSimsRAWRECO_v2/filesRecup/theRECOfile.root'
+                     		'file:/tmp/hbrun/SingleMuFile.root' 
     ),
 )
 
@@ -92,7 +93,8 @@ process.tpToGlbMuAssociation = cms.EDProducer('TrackAssociatorEDProducer',
 
 process.load("SimMuon.MCTruth.MuonAssociatorByHitsESProducer_NoSimHits_cfi") 
 process.runL2seed = cms.EDAnalyzer('L2seedsAnalyzer',
-                              isMC                    = cms.bool(True),
+                              isMC                      = cms.bool(True),
+                              selectJpsiOnly            = cms.bool(False),
                               muonProducer 		= cms.VInputTag(cms.InputTag("muons")),
                               primaryVertexInputTag   	= cms.InputTag("offlinePrimaryVertices"),
                               StandAloneTrackCollectionLabel = cms.untracked.string("standAloneMuons"),
@@ -142,18 +144,18 @@ del process.simHcalUnsuppressedDigis
 del process.simSiPixelDigis
 del process.simSiStripDigis
 
-process.out = cms.OutputModule("PoolOutputModule",
-                               outputCommands = cms.untracked.vstring(
-                                                                      'drop *',
-                                                                      'keep *_classByHitsTM_*_ALZ',
-                                                                      'keep *_myProducerLabel_*_ALZ',
-                                                                      'keep *_mix_*_ALZ'),
-                               fileName = cms.untracked.string('testRECOouput.root')
-                               )
+#process.out = cms.OutputModule("PoolOutputModule",
+#                               outputCommands = cms.untracked.vstring(
+#                                                                      'drop *',
+#                                                                      'keep *_classByHitsTM_*_ALZ',
+#                                                                      'keep *_myProducerLabel_*_ALZ',
+#                                                                      'keep *_mix_*_ALZ'),
+#                               fileName = cms.untracked.string('testRECOouput.root')
+#                               )
 
 #process.p = cms.Path(process.myProducerLabel*process.muonAssociatorByHitsL2seeds*process.muonAssociatorByHits+process.runL2seed)
 process.p = cms.Path(process.myProducerLabel*process.mix*process.runL2seed)
-process.outpath = cms.EndPath(process.out)
+#process.outpath = cms.EndPath(process.out)
 
 
 

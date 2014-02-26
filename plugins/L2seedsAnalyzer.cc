@@ -6,6 +6,7 @@ L2seedsAnalyzer::L2seedsAnalyzer(const edm::ParameterSet& iConfig)
 {
    //now do what ever initialization is needed
     isMC_                   = iConfig.getParameter<bool>("isMC");
+    isJPSIonly_             = iConfig.getParameter<bool>("selectJpsiOnly");
     muonProducers_	= iConfig.getParameter<vtag>("muonProducer");
     primaryVertexInputTag_  = iConfig.getParameter<edm::InputTag>("primaryVertexInputTag");
     theSTAMuonLabel_ = iConfig.getUntrackedParameter<std::string>("StandAloneTrackCollectionLabel");
@@ -278,7 +279,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                 theMotherID = theMother->pdgId();
                 if (theMother->pdgId()==443) break;
             }
-            if (theMotherID!=443) continue;
+            if (isJPSIonly_ && theMotherID!=443) continue;
             edm::LogVerbatim("L2seedsAnalyzer") << "gen muon:  eta=" << theCand.eta() << ", " << theCand.phi() << ", pt=" << theCand.pt();
             T_Gen_Muon_Px->push_back(theCand.px());
             T_Gen_Muon_Py->push_back(theCand.py());
