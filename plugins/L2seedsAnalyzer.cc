@@ -170,7 +170,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         
     }
     
-    
+    cout << "nb of STA tracks =" << staTracks->size() << endl; 
     
     beginEvent();
     
@@ -188,7 +188,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     }
     
     T_Event_EventNumber = iEvent.id().event();
-    
+    cout << "event number=" << iEvent.id().event() << endl;    
    /* int checkEvents[1] = {5709};
     bool goodEvent = false;
     for (int i = 0 ; i < 1 ; i++){
@@ -429,10 +429,11 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     }
     // now try a loop on the seeds :
     int countRH = 0;
+    cout << "on a " << L2seeds->size() << " seed in the event" << endl;
     for(TrajectorySeedCollection::const_iterator seed = L2seeds->begin(); seed != L2seeds->end(); ++seed){
         T_Seed_Muon_nHits->push_back(seed->nHits() );
         T_Seed_Muon_refFirstHit->push_back(countRH);
-        //cout << "coucou dans la seed, nHits=" << seed->nHits() << "first Hits=" << countRH << endl;
+        cout << "coucou dans la seed, nHits=" << seed->nHits() << "first Hits=" << countRH << endl;
         TrajectoryStateOnSurface theTrajectory = seedTransientState(*seed);
         T_Seed_Muon_Eta->push_back(theTrajectory.globalMomentum().eta());
         T_Seed_Muon_Phi->push_back(theTrajectory.globalMomentum().phi());
@@ -511,6 +512,9 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                     T_Hits_Muon_CSCiChamberType->push_back(-99);
                 }
         }
+        
+        
+        
     
 
         

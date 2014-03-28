@@ -11,7 +11,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 process.GlobalTag.globaltag = 'PRE_ST62_V8::All'
 
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.source = cms.Source("PoolSource",
@@ -19,8 +19,8 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
                                 #'/store/user/hbrun/samplesForSeedingStudies/CMSSW620/RelValSingleMuPt100_PRE_ST62_V8/reco_1.root'
 #				'/store/relval/CMSSW_6_2_0_patch1/RelValSingleMuPt100/GEN-SIM-RECO/POSTLS162_V1_UPG2015-v1/00000/DE749C75-E3FA-E211-BC47-0026189437E8.root'
-                                 '/store/user/hbrun/recup_620MuSimsRAWRECO_v2/filesRecup/theRECOfile.root'
-  #                   		'file:/tmp/hbrun/SingleMuFile.root' 
+#                                 '/store/user/hbrun/recup_620MuSimsRAWRECO_v2/filesRecup/theRECOfile.root'
+                     		'file:/tmp/hbrun/MUO-Fall13dr-00013.root'
     ),
 )
 
