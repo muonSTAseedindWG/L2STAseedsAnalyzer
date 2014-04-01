@@ -20,7 +20,8 @@ process.source = cms.Source("PoolSource",
                                 #'/store/user/hbrun/samplesForSeedingStudies/CMSSW620/RelValSingleMuPt100_PRE_ST62_V8/reco_1.root'
 #				'/store/relval/CMSSW_6_2_0_patch1/RelValSingleMuPt100/GEN-SIM-RECO/POSTLS162_V1_UPG2015-v1/00000/DE749C75-E3FA-E211-BC47-0026189437E8.root'
 #                                 '/store/user/hbrun/recup_620MuSimsRAWRECO_v2/filesRecup/theRECOfile.root'
-                     		'file:/tmp/hbrun/MUO-Fall13dr-00013.root'
+                     		#'file:/tmp/hbrun/MUO-Fall13dr-00013.root'
+                     		'file:/tmp/hbrun/localHere.root'
     ),
 )
 
@@ -94,7 +95,7 @@ process.tpToGlbMuAssociation = cms.EDProducer('TrackAssociatorEDProducer',
 process.load("SimMuon.MCTruth.MuonAssociatorByHitsESProducer_NoSimHits_cfi") 
 process.runL2seed = cms.EDAnalyzer('L2seedsAnalyzer',
                               isMC                      = cms.bool(True),
-                              selectJpsiOnly            = cms.bool(False),
+                              selectJpsiOnly            = cms.bool(True),
                               muonProducer 		= cms.VInputTag(cms.InputTag("muons")),
                               primaryVertexInputTag   	= cms.InputTag("offlinePrimaryVertices"),
                               StandAloneTrackCollectionLabel = cms.untracked.string("standAloneMuons"),
@@ -104,7 +105,10 @@ process.runL2seed = cms.EDAnalyzer('L2seedsAnalyzer',
                               L2seedTrackCollection = cms.InputTag("myProducerLabel"),
                               L2associator = cms.InputTag("muonAssociatorByHitsL2seeds"),
                               MuonRecHitBuilder = cms.string("MuonRecHitBuilder"),
-			      associatorLabel = cms.string("muonAssociatorByHits_NoSimHits"),
+			                  associatorLabel = cms.string("muonAssociatorByHits_NoSimHits"),
+                              HitsTrackCollection = cms.InputTag("HitsToTrack"),
+                              cscSegmentCollection = cms.InputTag("cscSegments"),
+                              dtSegmentCollection = cms.InputTag("dt4DSegments"),
                               outputFile = cms.string("muonSeedTree.root")
 )
 
@@ -124,6 +128,11 @@ process.load("SimMuon.MCTruth.MuonTrackProducer_cfi")
 process.myProducerLabel = cms.EDProducer('SeedToTrackProducer',
                                          L2seedsCollection = cms.InputTag("ancientMuonSeed")
                                          )
+
+process.HitsToTrack = cms.EDProducer('HitsToTrack',
+                                     cscSegmentCollection = cms.InputTag("cscSegments"),
+                                     dtSegmentCollection = cms.InputTag("dt4DSegments")
+                                     )
 
 process.load("SimGeneral.MixingModule.mixNoPU_cfi")
 
@@ -154,7 +163,7 @@ del process.simSiStripDigis
 #                               )
 
 #process.p = cms.Path(process.myProducerLabel*process.muonAssociatorByHitsL2seeds*process.muonAssociatorByHits+process.runL2seed)
-process.p = cms.Path(process.myProducerLabel*process.mix*process.runL2seed)
+process.p = cms.Path(process.myProducerLabel*process.HitsToTrack*process.mix*process.runL2seed)
 #process.outpath = cms.EndPath(process.out)
 
 

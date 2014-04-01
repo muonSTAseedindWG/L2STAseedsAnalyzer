@@ -41,6 +41,9 @@ using namespace std;
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
+#include "DataFormats/TrackingRecHit/interface/TrackingRecHitFwd.h"
+#include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
+
 
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
@@ -154,8 +157,11 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       edm::InputTag L2seedTrackCollectionTag_;
       std::string theMuonRecHitBuilderName_;
       std::string associatorLabel_;
-    
-      edm::ESHandle<MagneticField> theMGField;
+      edm::InputTag HitsTrackCollectionTag_;
+      edm::InputTag cscSegmentLabel_;
+      edm::InputTag dtSegmentLabel_;
+
+    edm::ESHandle<MagneticField> theMGField;
       edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry;
 
     
@@ -239,13 +245,29 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     std::vector<float> *T_Gen_Muon_StaPurity;
     std::vector<float> *T_Gen_Muon_StaQuality;
     
-    std::vector<int> *T_Gen_Muon_FoundL2;
+    std::vector<int>   *T_Gen_Muon_FoundL2;
     std::vector<float> *T_Gen_Muon_L2Eta;
     std::vector<float> *T_Gen_Muon_L2Phi;
     std::vector<float> *T_Gen_Muon_L2Purity;
     std::vector<float> *T_Gen_Muon_L2Quality;
     
     std::vector<int> *T_Gen_Muon_L2crudeMaching;
+    
+    
+    std::vector<float> *T_Gen_Muon_HitstpPt;
+    std::vector<float> *T_Gen_Muon_HitstpPhi;
+    std::vector<float> *T_Gen_Muon_HitstpEta;
+    std::vector<float> *T_Gen_Muon_HitsEta;
+    std::vector<float> *T_Gen_Muon_HitsPhi;
+    std::vector<float> *T_Gen_Muon_Hitsx;
+    std::vector<float> *T_Gen_Muon_Hitsy;
+    std::vector<float> *T_Gen_Muon_Hitsz;
+    std::vector<float> *T_Gen_Muon_HitsQuality;
+    
+    
+    
+    
+    
     
     //STA muon
     
@@ -274,6 +296,10 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     std::vector<float> *T_Hits_Muon_localL2x;
     std::vector<float> *T_Hits_Muon_localL2y;
     std::vector<float> *T_Hits_Muon_localL2z;
+    std::vector<float> *T_Hits_Muon_globalL2x;
+    std::vector<float> *T_Hits_Muon_globalL2y;
+    std::vector<float> *T_Hits_Muon_globalL2z;
+    
     std::vector<int> *T_Hits_Muon_isDT;
     std::vector<int> *T_Hits_Muon_DTwire;
     std::vector<int> *T_Hits_Muon_DTlayer;
@@ -285,7 +311,33 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     std::vector<int> *T_Hits_Muon_CSClayer;
     std::vector<int> *T_Hits_Muon_CSCchamber;
     std::vector<int> *T_Hits_Muon_CSCring;
+    std::vector<int> *T_Hits_Muon_CSCstation;
     std::vector<int> *T_Hits_Muon_CSCiChamberType;
+    
+
+    std::vector<float> *T_HitsAll_Muon_L2Eta;
+    std::vector<float> *T_HitsAll_Muon_L2Phi;
+    std::vector<float> *T_HitsAll_Muon_localL2x;
+    std::vector<float> *T_HitsAll_Muon_localL2y;
+    std::vector<float> *T_HitsAll_Muon_localL2z;
+    std::vector<float> *T_HitsAll_Muon_globalL2x;
+    std::vector<float> *T_HitsAll_Muon_globalL2y;
+    std::vector<float> *T_HitsAll_Muon_globalL2z;
+
+    
+    std::vector<int> *T_HitsAll_Muon_isDT;
+    std::vector<int> *T_HitsAll_Muon_DTwire;
+    std::vector<int> *T_HitsAll_Muon_DTlayer;
+    std::vector<int> *T_HitsAll_Muon_DTsuperlayer;
+    std::vector<int> *T_HitsAll_Muon_DTWheel;
+    std::vector<int> *T_HitsAll_Muon_DTStation;
+    std::vector<int> *T_HitsAll_Muon_DTSector;
+    std::vector<int> *T_HitsAll_Muon_isCSC;
+    std::vector<int> *T_HitsAll_Muon_CSClayer;
+    std::vector<int> *T_HitsAll_Muon_CSCchamber;
+    std::vector<int> *T_HitsAll_Muon_CSCring;
+    std::vector<int> *T_HitsAll_Muon_CSCstation;
+    std::vector<int> *T_HitsAll_Muon_CSCiChamberType;
     
     
     
