@@ -338,17 +338,19 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
             T_Gen_Muon_Energy->push_back(theCand.energy());
             T_Gen_Muon_PDGid->push_back(theCand.pdgId());
             T_Gen_Muon_status->push_back(theCand.status());
-        
-	    //cout << "part=" << theCand.pdgId() << " motherID=" << theMotherID << endl;
+       //     cout  << "gen muon:  eta=" << theCand.eta() << ", phi=" << theCand.phi() << ", pt=" << theCand.pt() << endl;
+	       // cout << "part=" << theCand.pdgId() << " motherID=" << theMotherID << endl;
             T_Gen_Muon_MotherID->push_back(theMotherID);
             bool foundMatchingTP = false;
             for (TrackingParticleCollection::size_type i=0; i<tPC.size(); i++) {
                 TrackingParticleRef trpart(TPCollectionH, i);
                 float deltaRtp = sqrt(pow(trpart->eta()-theCand.eta(),2)+ pow(acos(cos(trpart->phi()-theCand.phi())),2)) ;
                 float detlaPttp = fabs(trpart->pt()-theCand.pt())/theCand.pt();
-                if ((deltaRtp < 0.3)&&(detlaPttp<0.2)){
+            //    cout  << "avant Matching= Pt=" <<trpart->pt() << " eta=" <<trpart->eta() << " phi=" << trpart->phi() << endl;
+                if ((deltaRtp < 0.1)&&(detlaPttp<0.05)){
                     foundMatchingTP = true;
                     edm::LogVerbatim("L2seedsAnalyzer") << "after Matching= Pt=" <<trpart->pt() << " eta=" <<trpart->eta() << " phi=" << trpart->phi();
+               //     cout  << "after Matching= Pt=" <<trpart->pt() << " eta=" <<trpart->eta() << " phi=" << trpart->phi() << endl;
                     T_Gen_Muon_tpPt->push_back(trpart->pt());
                     T_Gen_Muon_tpEta->push_back(trpart->eta());
                     T_Gen_Muon_tpPhi->push_back(trpart->phi());
@@ -442,10 +444,11 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                             double quality = IT->second;
                             //  cout << "quality =" << quality << endl;
                             for(trackingRecHit_iterator theHit = track->recHitsBegin(); theHit != track->recHitsEnd(); theHit++) {
-                                //TrackingRecHit seghit = (*theHit))->clone();
+                             //   TrackingRecHit seghit = (*theHit))->clone();
                                 TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(&**theHit));
-                                //  cout << "candidate eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi()  << endl;
-                                //  cout << "candidate x=" << ttrh->globalPosition().x() << " y=" << ttrh->globalPosition().y()  << " z=" << ttrh->globalPosition().z()<< endl;
+                            //    cout << "tp pt=" << trpart->pt() << " eta=" << trpart->eta() << " phi=" << trpart->phi() << endl;
+                             //   cout << "candidate eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi()  << endl;
+                             //   cout << "candidate x=" << ttrh->globalPosition().x() << " y=" << ttrh->globalPosition().y()  << " z=" << ttrh->globalPosition().z()<< endl;
                                 T_Gen_Muon_HitstpPt->push_back(trpart->pt());
                                 T_Gen_Muon_HitstpPhi->push_back(trpart->phi());
                                 T_Gen_Muon_HitstpEta->push_back(trpart->eta());
