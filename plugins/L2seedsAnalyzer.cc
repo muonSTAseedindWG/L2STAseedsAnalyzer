@@ -211,7 +211,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     }
     
     T_Event_EventNumber = iEvent.id().event();
- //   cout << "event number=" << iEvent.id().event() << endl;
+    cout << "event number=" << iEvent.id().event() << endl;
    /* int checkEvents[1] = {5709};
     bool goodEvent = false;
     for (int i = 0 ; i < 1 ; i++){
@@ -338,7 +338,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
             T_Gen_Muon_Energy->push_back(theCand.energy());
             T_Gen_Muon_PDGid->push_back(theCand.pdgId());
             T_Gen_Muon_status->push_back(theCand.status());
-       //     cout  << "gen muon:  eta=" << theCand.eta() << ", phi=" << theCand.phi() << ", pt=" << theCand.pt() << endl;
+          //  cout  << "gen muon:  eta=" << theCand.eta() << ", phi=" << theCand.phi() << ", pt=" << theCand.pt() << endl;
 	       // cout << "part=" << theCand.pdgId() << " motherID=" << theMotherID << endl;
             T_Gen_Muon_MotherID->push_back(theMotherID);
             bool foundMatchingTP = false;
@@ -347,10 +347,11 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                 float deltaRtp = sqrt(pow(trpart->eta()-theCand.eta(),2)+ pow(acos(cos(trpart->phi()-theCand.phi())),2)) ;
                 float detlaPttp = fabs(trpart->pt()-theCand.pt())/theCand.pt();
             //    cout  << "avant Matching= Pt=" <<trpart->pt() << " eta=" <<trpart->eta() << " phi=" << trpart->phi() << endl;
-                if ((deltaRtp < 0.1)&&(detlaPttp<0.05)){
+               // cout << "       deltaRtp=" << deltaRtp << " detlaPttp=" << detlaPttp << endl;
+                 if ((deltaRtp < 0.1)&&(detlaPttp<0.05)){
                     foundMatchingTP = true;
                     edm::LogVerbatim("L2seedsAnalyzer") << "after Matching= Pt=" <<trpart->pt() << " eta=" <<trpart->eta() << " phi=" << trpart->phi();
-               //     cout  << "after Matching= Pt=" <<trpart->pt() << " eta=" <<trpart->eta() << " phi=" << trpart->phi() << endl;
+                    cout  << "after Matching= Pt=" <<trpart->pt() << " eta=" <<trpart->eta() << " phi=" << trpart->phi() << endl;
                     T_Gen_Muon_tpPt->push_back(trpart->pt());
                     T_Gen_Muon_tpEta->push_back(trpart->eta());
                     T_Gen_Muon_tpPhi->push_back(trpart->phi());
@@ -401,7 +402,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                             const TrackingRecHit *seghit = &(*(theSeed.recHits().first));
                             TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(seghit));
                             //cout << "phi=" << ttrh->globalPosition().phi() << endl;
-                            // cout << "eta=" << ttrh->globalPosition().eta() << endl;
+                            //cout << "eta=" << ttrh->globalPosition().eta() << endl;
                             T_Gen_Muon_L2Eta->push_back(ttrh->globalPosition().eta());
                             T_Gen_Muon_L2Phi->push_back(ttrh->globalPosition().phi());
                             edm::LogVerbatim("L2seedsAnalyzer") << "found a L2  seed = Eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi();
@@ -446,9 +447,10 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                             for(trackingRecHit_iterator theHit = track->recHitsBegin(); theHit != track->recHitsEnd(); theHit++) {
                              //   TrackingRecHit seghit = (*theHit))->clone();
                                 TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(&**theHit));
-                            //    cout << "tp pt=" << trpart->pt() << " eta=" << trpart->eta() << " phi=" << trpart->phi() << endl;
-                             //   cout << "candidate eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi()  << endl;
-                             //   cout << "candidate x=" << ttrh->globalPosition().x() << " y=" << ttrh->globalPosition().y()  << " z=" << ttrh->globalPosition().z()<< endl;
+                                //cout << "               tp pt=" << trpart->pt() << " eta=" << trpart->eta() << " phi=" << trpart->phi() << endl;
+                                cout << "       candidate eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi()  << endl;
+                                cout << "       quality =" << quality << endl;
+                            //    cout << "candidate x=" << ttrh->globalPosition().x() << " y=" << ttrh->globalPosition().y()  << " z=" << ttrh->globalPosition().z()<< endl;
                                 T_Gen_Muon_HitstpPt->push_back(trpart->pt());
                                 T_Gen_Muon_HitstpPhi->push_back(trpart->phi());
                                 T_Gen_Muon_HitstpEta->push_back(trpart->eta());
