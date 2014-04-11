@@ -432,18 +432,46 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                     }
                     if (foundACrudeMatching) T_Gen_Muon_L2crudeMaching->push_back(1);
                     else T_Gen_Muon_L2crudeMaching->push_back(0);
-                    std::vector<std::pair<edm::RefToBase<reco::Track>, double> > simRecAsso;
+                    for (TrackingParticle::g4t_iterator simtrack = trpart->g4Track_begin(); simtrack !=  trpart->g4Track_end(); ++simtrack) {
+                        cout << "inside TP!" << endl;
+                    }
+                   /*  cout << "nb Hits tracks=" << HitTracks->size() << endl;
+                     for (unsigned int iteHits = 0 ; iteHits<HitTracks->size(); iteHits++ ){
+                         cout << "iteHits=" << iteHits << endl;
+                         const reco::Track* theHitTrack = &((*HitTracks)[iteHits]);
+                         edm::RefToBase<reco::Track> theHitRef = HitTracks[iteHits];
+                         cout << "the trackPt=" << theHitTrack->pt() << endl;
+                         if(HitrecSimColl.find(theHitTrack) != HitrecSimColl.end()) {
+                             cout << "hello on a trouve une tp qui marche ! " << endl;
+                         }
+                         
+                     }*/
+                /*    std::vector<std::pair<edm::RefToBase<reco::Track>, double> > simRecAsso;
                     if(HitsimRecColl.find(trpart) != HitsimRecColl.end()) {
                         //  cout << "youhou on a trouve un asso" << endl;
                         simRecAsso = (std::vector<std::pair<edm::RefToBase<reco::Track>, double> >) HitsimRecColl[trpart];
                         for (std::vector<std::pair<edm::RefToBase<reco::Track>, double> >::const_iterator IT = simRecAsso.begin();
                              IT != simRecAsso.end(); ++IT) {
+                            cout << "new track=" << endl;
                             edm::RefToBase<reco::Track> track = IT->first;
                             //TrackHitsCollection tH;
                             // tH.push_back(std::make_pair((track)->recHitsBegin(), (track)->recHitsEnd()));
                             //  edm::OwnVector<TrackingRecHit> recHit;
                             double quality = IT->second;
-                            //  cout << "quality =" << quality << endl;
+                        //    cout << "check the right tp particle" << endl;
+                            bool matchinWithRightTP = false;
+                            if(HitrecSimColl.find(track) != HitrecSimColl.end()) {
+                         //       cout << "coucou on a trouve un tp à tester" << endl;
+                                std::vector<std::pair<TrackingParticleRef, double> > theTpHitAsso = HitrecSimColl[track];
+                                std::vector<std::pair<TrackingParticleRef, double> >::const_iterator ITS = theTpHitAsso.begin();
+                                   // ITS != theTpHitAsso.end(); ++ITS) {
+                                    TrackingParticleRef localTp = ITS->first;
+                                    cout << "the matched tp, pt=" << (*localTp).pt() << " eta=" << (*localTp).eta() << "the purity=" << ITS->second << endl;
+                                    if (trpart == localTp) matchinWithRightTP = true;
+                                    
+                                }
+                           // }
+                            if (!(matchinWithRightTP)) continue;
                             for(trackingRecHit_iterator theHit = track->recHitsBegin(); theHit != track->recHitsEnd(); theHit++) {
                              //   TrackingRecHit seghit = (*theHit))->clone();
                                 TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(&**theHit));
@@ -472,8 +500,8 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                             //TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(recHit));
                             // cout << "candidate eta=" << ttrh->globalPosition().eta() << " phi=" << ttrh->globalPosition().phi() << " quality=" << quality << endl;
                             
-                        }
-                    }
+                      //  }
+                    //}
                 }
                 if (foundMatchingTP) break;
               //  cout << "on est dans la TP pt=" << trpart->pt() << " eta=" << trpart->eta() << " phi=" << trpart->phi() << endl;
