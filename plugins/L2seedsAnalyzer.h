@@ -157,11 +157,10 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       edm::InputTag L2seedTrackCollectionTag_;
       std::string theMuonRecHitBuilderName_;
       std::string associatorLabel_;
-      edm::InputTag HitsTrackCollectionTag_;
       edm::InputTag cscSegmentLabel_;
       edm::InputTag dtSegmentLabel_;
 
-    edm::ESHandle<MagneticField> theMGField;
+      edm::ESHandle<MagneticField> theMGField;
       edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry;
 
     

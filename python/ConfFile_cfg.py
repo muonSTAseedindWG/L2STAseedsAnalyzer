@@ -106,7 +106,6 @@ process.runL2seed = cms.EDAnalyzer('L2seedsAnalyzer',
                               L2associator = cms.InputTag("muonAssociatorByHitsL2seeds"),
                               MuonRecHitBuilder = cms.string("MuonRecHitBuilder"),
 			                  associatorLabel = cms.string("muonAssociatorByHits_NoSimHits"),
-                              HitsTrackCollection = cms.InputTag("HitsToTrack"),
                               cscSegmentCollection = cms.InputTag("cscSegments"),
                               dtSegmentCollection = cms.InputTag("dt4DSegments"),
                               outputFile = cms.string("muonSeedTree.root")
@@ -125,14 +124,11 @@ process.load("SimMuon.MCTruth.MuonTrackProducer_cfi")
 #                               )
 
 #process.load("hugues.SeedToTrackProducer.SeedToTrackProducer_cfg")
-process.myProducerLabel = cms.EDProducer('SeedToTrackProducer',
+process.seedsInTracks = cms.EDProducer('SeedToTrackProducer',
                                          L2seedsCollection = cms.InputTag("ancientMuonSeed")
                                          )
 
-process.HitsToTrack = cms.EDProducer('HitsToTrack',
-                                     cscSegmentCollection = cms.InputTag("cscSegments"),
-                                     dtSegmentCollection = cms.InputTag("dt4DSegments")
-                                     )
+
 
 process.load("SimGeneral.MixingModule.mixNoPU_cfi")
 
@@ -163,7 +159,7 @@ del process.simSiStripDigis
 #                               )
 
 #process.p = cms.Path(process.myProducerLabel*process.muonAssociatorByHitsL2seeds*process.muonAssociatorByHits+process.runL2seed)
-process.p = cms.Path(process.myProducerLabel*process.HitsToTrack*process.mix*process.runL2seed)
+process.p = cms.Path(process.seedsInTracks*process.mix*process.runL2seed)
 #process.outpath = cms.EndPath(process.out)
 
 
