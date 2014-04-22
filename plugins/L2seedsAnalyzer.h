@@ -244,13 +244,13 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     std::vector<float> *T_Gen_Muon_StaPurity;
     std::vector<float> *T_Gen_Muon_StaQuality;
     
-    std::vector<int>   *T_Gen_Muon_FoundL2;
-    std::vector<float> *T_Gen_Muon_L2Eta;
-    std::vector<float> *T_Gen_Muon_L2Phi;
-    std::vector<float> *T_Gen_Muon_L2Purity;
-    std::vector<float> *T_Gen_Muon_L2Quality;
+    std::vector<int>   *T_Gen_Muon_FoundSTAseed;
+    std::vector<float> *T_Gen_Muon_STAseedEta;
+    std::vector<float> *T_Gen_Muon_STAseedPhi;
+    std::vector<float> *T_Gen_Muon_STAseedPurity;
+    std::vector<float> *T_Gen_Muon_STAseedQuality;
     
-    std::vector<int> *T_Gen_Muon_L2crudeMaching;
+    std::vector<int> *T_Gen_Muon_STAseedcrudeMaching;
     
     
     std::vector<float> *T_Gen_Muon_HitstpPt;
@@ -290,14 +290,14 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     // hits
     
     
-    std::vector<float> *T_Hits_Muon_L2Eta;
-    std::vector<float> *T_Hits_Muon_L2Phi;
-    std::vector<float> *T_Hits_Muon_localL2x;
-    std::vector<float> *T_Hits_Muon_localL2y;
-    std::vector<float> *T_Hits_Muon_localL2z;
-    std::vector<float> *T_Hits_Muon_globalL2x;
-    std::vector<float> *T_Hits_Muon_globalL2y;
-    std::vector<float> *T_Hits_Muon_globalL2z;
+    std::vector<float> *T_Hits_Muon_STAseedEta;
+    std::vector<float> *T_Hits_Muon_STAseedPhi;
+    std::vector<float> *T_Hits_Muon_localSTAseedx;
+    std::vector<float> *T_Hits_Muon_localSTAseedy;
+    std::vector<float> *T_Hits_Muon_localSTAseedz;
+    std::vector<float> *T_Hits_Muon_globalSTAseedx;
+    std::vector<float> *T_Hits_Muon_globalSTAseedy;
+    std::vector<float> *T_Hits_Muon_globalSTAseedz;
     
     std::vector<int> *T_Hits_Muon_isDT;
     std::vector<int> *T_Hits_Muon_DTwire;
@@ -314,14 +314,14 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     std::vector<int> *T_Hits_Muon_CSCiChamberType;
     
 
-    std::vector<float> *T_HitsAll_Muon_L2Eta;
-    std::vector<float> *T_HitsAll_Muon_L2Phi;
-    std::vector<float> *T_HitsAll_Muon_localL2x;
-    std::vector<float> *T_HitsAll_Muon_localL2y;
-    std::vector<float> *T_HitsAll_Muon_localL2z;
-    std::vector<float> *T_HitsAll_Muon_globalL2x;
-    std::vector<float> *T_HitsAll_Muon_globalL2y;
-    std::vector<float> *T_HitsAll_Muon_globalL2z;
+    std::vector<float> *T_HitsAll_Muon_STAseedEta;
+    std::vector<float> *T_HitsAll_Muon_STAseedPhi;
+    std::vector<float> *T_HitsAll_Muon_localSTAseedx;
+    std::vector<float> *T_HitsAll_Muon_localSTAseedy;
+    std::vector<float> *T_HitsAll_Muon_localSTAseedz;
+    std::vector<float> *T_HitsAll_Muon_globalSTAseedx;
+    std::vector<float> *T_HitsAll_Muon_globalSTAseedy;
+    std::vector<float> *T_HitsAll_Muon_globalSTAseedz;
 
     
     std::vector<int> *T_HitsAll_Muon_isDT;
