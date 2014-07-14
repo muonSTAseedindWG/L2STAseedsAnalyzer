@@ -299,6 +299,10 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     std::vector<float> *T_Hits_Muon_globalSTAseedy;
     std::vector<float> *T_Hits_Muon_globalSTAseedz;
     
+    std::vector<float> *T_Hits_Muon_globalDirSTAseedx;
+    std::vector<float> *T_Hits_Muon_globalDirSTAseedy;
+    std::vector<float> *T_Hits_Muon_globalDirSTAseedz;
+    
     std::vector<int> *T_Hits_Muon_isDT;
     std::vector<int> *T_Hits_Muon_DTwire;
     std::vector<int> *T_Hits_Muon_DTlayer;
@@ -322,7 +326,9 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     std::vector<float> *T_HitsAll_Muon_globalSTAseedx;
     std::vector<float> *T_HitsAll_Muon_globalSTAseedy;
     std::vector<float> *T_HitsAll_Muon_globalSTAseedz;
-
+    std::vector<float> *T_HitsAll_Muon_globalDirSTAseedx;
+    std::vector<float> *T_HitsAll_Muon_globalDirSTAseedy;
+    std::vector<float> *T_HitsAll_Muon_globalDirSTAseedz;
     
     std::vector<int> *T_HitsAll_Muon_isDT;
     std::vector<int> *T_HitsAll_Muon_DTwire;
@@ -338,7 +344,7 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
     std::vector<int> *T_HitsAll_Muon_CSCstation;
     std::vector<int> *T_HitsAll_Muon_CSCiChamberType;
     
-    
+
     
 };
 

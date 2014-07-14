@@ -34,6 +34,7 @@
 <use   name="SimTracker/Records"/>
 <use   name="SimTracker/TrackAssociation"/>
 <use   name="MuonAnalysis/MuonAssociators"/>
+<use   name="RecoMuon/TransientTrackingRecHit"/>
 <use   name="clhep"/>
 <use   name="root"/>
 <flags EDM_PLUGIN="1"/>

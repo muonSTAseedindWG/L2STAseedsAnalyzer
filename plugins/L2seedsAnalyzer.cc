@@ -455,6 +455,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         //now loop on the recHits
         for(TrajectorySeed::recHitContainer::const_iterator itRecHits=seed->recHits().first; itRecHits!=seed->recHits().second; ++itRecHits, ++countRH) {
             const TrackingRecHit *seghit = &(*itRecHits);
+
             if((*seghit).isValid()) {
                 MuonTransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(seghit));
                 T_Hits_Muon_STAseedEta->push_back(ttrh->globalPosition().eta());
@@ -477,6 +478,7 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
             if (subdet == MuonSubdetId::DT)
             {
                 T_Hits_Muon_isDT->push_back(1);
+                DetId geoidDT = (*itRecHits).geographicalId();
                 DTWireId dtdetid = DTWireId(detid);
                 T_Hits_Muon_DTwire->push_back(dtdetid.wire());
                 T_Hits_Muon_DTlayer->push_back(dtdetid.layerId().layer());
@@ -484,6 +486,11 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                 T_Hits_Muon_DTWheel->push_back(dtdetid.layerId().superlayerId().chamberId().wheel());
                 T_Hits_Muon_DTStation->push_back(dtdetid.layerId().superlayerId().chamberId().station());
                 T_Hits_Muon_DTSector->push_back(dtdetid.layerId().superlayerId().chamberId().sector());
+                const GeomDet* det = theTrackingGeometry->idToDet(geoidDT);
+            	MuonTransientTrackingRecHit::MuonRecHitPointer RHpointer = MuonTransientTrackingRecHit::specificBuild(det,seghit);
+                T_Hits_Muon_globalDirSTAseedx->push_back(RHpointer->globalDirection().x());
+                T_Hits_Muon_globalDirSTAseedy->push_back(RHpointer->globalDirection().y());
+                T_Hits_Muon_globalDirSTAseedz->push_back(RHpointer->globalDirection().z());
             }
             else {
                 T_Hits_Muon_isDT->push_back(0);
@@ -496,12 +503,18 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
             }
             if (subdet == MuonSubdetId::CSC){
                 T_Hits_Muon_isCSC->push_back(1);
+                DetId geoidCSC = (*itRecHits).geographicalId();
                 CSCDetId cscdetid = CSCDetId(detid);
                 T_Hits_Muon_CSClayer->push_back(cscdetid.layer());
                 T_Hits_Muon_CSCchamber->push_back(cscdetid.chamber());
                 T_Hits_Muon_CSCring->push_back(cscdetid.ring());
                 T_Hits_Muon_CSCstation->push_back(cscdetid.station());
                 T_Hits_Muon_CSCiChamberType->push_back(cscdetid.iChamberType());
+                const GeomDet* det = theTrackingGeometry->idToDet(geoidCSC);
+            	MuonTransientTrackingRecHit::MuonRecHitPointer RHpointer = MuonTransientTrackingRecHit::specificBuild(det,seghit);
+                T_Hits_Muon_globalDirSTAseedx->push_back(RHpointer->globalDirection().x());
+                T_Hits_Muon_globalDirSTAseedy->push_back(RHpointer->globalDirection().y());
+                T_Hits_Muon_globalDirSTAseedz->push_back(RHpointer->globalDirection().z());
             }
             else {
                 T_Hits_Muon_isCSC->push_back(0);
@@ -512,7 +525,13 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                 T_Hits_Muon_CSCiChamberType->push_back(-99);
             }
         }
-        
+       
+       //read the geometry
+       edm::ESHandle<MuonDetLayerGeometry> muonLayers;
+       iSetup.get<MuonRecoGeometryRecord>().get(muonLayers);
+       vector<DetLayer*> dtLayers = muonLayers->allDTLayers();
+       ESHandle<GlobalTrackingGeometry> theTrackingGeometry;  
+      iSetup.get<GlobalTrackingGeometryRecord>().get(theTrackingGeometry);
         for (CSCSegmentCollection::const_iterator seg=cscSegments->begin() ;
              seg!=cscSegments->end() ; ++seg ){
             DetId geoidCSC = (*seg).geographicalId();
@@ -529,7 +548,14 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                 T_HitsAll_Muon_globalSTAseedx->push_back(ttrh->globalPosition().x());
                 T_HitsAll_Muon_globalSTAseedy->push_back(ttrh->globalPosition().y());
                 T_HitsAll_Muon_globalSTAseedz->push_back(ttrh->globalPosition().z());
+                //cout << "test global direction " << ttrh->globalDirection().x() << endl;
+                const GeomDet* det = theTrackingGeometry->idToDet(geoidCSC);
+            	MuonTransientTrackingRecHit::MuonRecHitPointer RHpointer = MuonTransientTrackingRecHit::specificBuild(det,seghit);
+                T_HitsAll_Muon_globalDirSTAseedx->push_back(RHpointer->globalDirection().x());
+                T_HitsAll_Muon_globalDirSTAseedy->push_back(RHpointer->globalDirection().y());
+                T_HitsAll_Muon_globalDirSTAseedz->push_back(RHpointer->globalDirection().z());
             }
+            //MuonTransientTrackingRecHit::MuonRecHitPointer RHpointer = MuonTransientTrackingRecHit::specificBuild(tmpGeomDet,seghit);
             T_HitsAll_Muon_CSClayer->push_back(cscdetid.layer());
             T_HitsAll_Muon_CSCchamber->push_back(cscdetid.chamber());
             T_HitsAll_Muon_CSCring->push_back(cscdetid.ring());
@@ -550,6 +576,8 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
             T_HitsAll_Muon_localSTAseedx->push_back((*seg).localPosition().x());
             T_HitsAll_Muon_localSTAseedy->push_back((*seg).localPosition().y());
             T_HitsAll_Muon_localSTAseedz->push_back((*seg).localPosition().z());
+            DetId geoidDT = (*seg).geographicalId();
+            DTWireId dtdetid = DTWireId(geoidDT);
             const TrackingRecHit *seghit = &(*seg);
             if((*seghit).isValid()) {
                 TransientTrackingRecHit::ConstRecHitPointer ttrh(theMuonRecHitBuilder->build(seghit));
@@ -558,9 +586,13 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                 T_HitsAll_Muon_globalSTAseedx->push_back(ttrh->globalPosition().x());
                 T_HitsAll_Muon_globalSTAseedy->push_back(ttrh->globalPosition().y());
                 T_HitsAll_Muon_globalSTAseedz->push_back(ttrh->globalPosition().z());
+                const GeomDet* det = theTrackingGeometry->idToDet(geoidDT);
+            	MuonTransientTrackingRecHit::MuonRecHitPointer RHpointer = MuonTransientTrackingRecHit::specificBuild(det,seghit);
+                T_HitsAll_Muon_globalDirSTAseedx->push_back(RHpointer->globalDirection().x());
+                T_HitsAll_Muon_globalDirSTAseedy->push_back(RHpointer->globalDirection().y());
+                T_HitsAll_Muon_globalDirSTAseedz->push_back(RHpointer->globalDirection().z());
             }
-            DetId geoidDT = (*seg).geographicalId();
-            DTWireId dtdetid = DTWireId(geoidDT);
+
             
             T_HitsAll_Muon_DTwire->push_back(dtdetid.wire());
             T_HitsAll_Muon_DTlayer->push_back(dtdetid.layerId().layer());
@@ -568,7 +600,6 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
             T_HitsAll_Muon_DTWheel->push_back(dtdetid.layerId().superlayerId().chamberId().wheel());
             T_HitsAll_Muon_DTStation->push_back(dtdetid.layerId().superlayerId().chamberId().station());
             T_HitsAll_Muon_DTSector->push_back(dtdetid.layerId().superlayerId().chamberId().sector());
-   
             T_HitsAll_Muon_isCSC->push_back(0);
             T_HitsAll_Muon_CSClayer->push_back(-99);
             T_HitsAll_Muon_CSCchamber->push_back(-99);
@@ -660,6 +691,11 @@ L2seedsAnalyzer::beginJob()
     mytree_->Branch("T_Hits_Muon_globalSTAseedx", "std::vector<float>", &T_Hits_Muon_globalSTAseedx);
     mytree_->Branch("T_Hits_Muon_globalSTAseedy", "std::vector<float>", &T_Hits_Muon_globalSTAseedy);
     mytree_->Branch("T_Hits_Muon_globalSTAseedz", "std::vector<float>", &T_Hits_Muon_globalSTAseedz);
+    mytree_->Branch("T_Hits_Muon_globalDirSTAseedx", "std::vector<float>", &T_Hits_Muon_globalDirSTAseedx);
+    mytree_->Branch("T_Hits_Muon_globalDirSTAseedy", "std::vector<float>", &T_Hits_Muon_globalDirSTAseedy);
+    mytree_->Branch("T_Hits_Muon_globalDirSTAseedz", "std::vector<float>", &T_Hits_Muon_globalDirSTAseedz);
+
+    
     mytree_->Branch("T_Hits_Muon_isDT", "std::vector<int>", &T_Hits_Muon_isDT);
     mytree_->Branch("T_Hits_Muon_DTwire", "std::vector<int>", &T_Hits_Muon_DTwire);
     mytree_->Branch("T_Hits_Muon_DTlayer", "std::vector<int>", &T_Hits_Muon_DTlayer);
@@ -683,6 +719,10 @@ L2seedsAnalyzer::beginJob()
     mytree_->Branch("T_HitsAll_Muon_globalSTAseedx", "std::vector<float>", &T_HitsAll_Muon_globalSTAseedx);
     mytree_->Branch("T_HitsAll_Muon_globalSTAseedy", "std::vector<float>", &T_HitsAll_Muon_globalSTAseedy);
     mytree_->Branch("T_HitsAll_Muon_globalSTAseedz", "std::vector<float>", &T_HitsAll_Muon_globalSTAseedz);
+    mytree_->Branch("T_HitsAll_Muon_globalDirSTAseedx", "std::vector<float>", &T_HitsAll_Muon_globalDirSTAseedx);
+    mytree_->Branch("T_HitsAll_Muon_globalDirSTAseedy", "std::vector<float>", &T_HitsAll_Muon_globalDirSTAseedy);
+    mytree_->Branch("T_HitsAll_Muon_globalDirSTAseedz", "std::vector<float>", &T_HitsAll_Muon_globalDirSTAseedz);
+    
     mytree_->Branch("T_HitsAll_Muon_isDT", "std::vector<int>", &T_HitsAll_Muon_isDT);
     mytree_->Branch("T_HitsAll_Muon_DTwire", "std::vector<int>", &T_HitsAll_Muon_DTwire);
     mytree_->Branch("T_HitsAll_Muon_DTlayer", "std::vector<int>", &T_HitsAll_Muon_DTlayer);
@@ -874,6 +914,10 @@ L2seedsAnalyzer::beginEvent()
     T_Hits_Muon_globalSTAseedx = new std::vector<float>;
     T_Hits_Muon_globalSTAseedy = new std::vector<float>;
     T_Hits_Muon_globalSTAseedz = new std::vector<float>;
+    T_Hits_Muon_globalDirSTAseedx = new std::vector<float>;
+    T_Hits_Muon_globalDirSTAseedy = new std::vector<float>;
+    T_Hits_Muon_globalDirSTAseedz = new std::vector<float>;
+    
     T_Hits_Muon_isDT = new std::vector<int>;
     T_Hits_Muon_DTwire = new std::vector<int>;
     T_Hits_Muon_DTlayer = new std::vector<int>;
@@ -897,6 +941,9 @@ L2seedsAnalyzer::beginEvent()
     T_HitsAll_Muon_globalSTAseedx = new std::vector<float>;
     T_HitsAll_Muon_globalSTAseedy = new std::vector<float>;
     T_HitsAll_Muon_globalSTAseedz = new std::vector<float>;
+    T_HitsAll_Muon_globalDirSTAseedx = new std::vector<float>;
+    T_HitsAll_Muon_globalDirSTAseedy = new std::vector<float>;
+    T_HitsAll_Muon_globalDirSTAseedz = new std::vector<float>;
     T_HitsAll_Muon_isDT = new std::vector<int>;
     T_HitsAll_Muon_DTwire = new std::vector<int>;
     T_HitsAll_Muon_DTlayer = new std::vector<int>;
@@ -1015,6 +1062,10 @@ L2seedsAnalyzer::endEvent()
     delete T_Hits_Muon_globalSTAseedx;
     delete T_Hits_Muon_globalSTAseedy;
     delete T_Hits_Muon_globalSTAseedz;
+    delete T_Hits_Muon_globalDirSTAseedx;
+    delete T_Hits_Muon_globalDirSTAseedy;
+    delete T_Hits_Muon_globalDirSTAseedz;
+
     delete T_Hits_Muon_isDT;
     delete T_Hits_Muon_DTwire;
     delete T_Hits_Muon_DTlayer;
@@ -1037,6 +1088,9 @@ L2seedsAnalyzer::endEvent()
     delete T_HitsAll_Muon_globalSTAseedx;
     delete T_HitsAll_Muon_globalSTAseedy;
     delete T_HitsAll_Muon_globalSTAseedz;
+    delete T_HitsAll_Muon_globalDirSTAseedx;
+    delete T_HitsAll_Muon_globalDirSTAseedy;
+    delete T_HitsAll_Muon_globalDirSTAseedz;
     delete T_HitsAll_Muon_isDT;
     delete T_HitsAll_Muon_DTwire;
     delete T_HitsAll_Muon_DTlayer;
