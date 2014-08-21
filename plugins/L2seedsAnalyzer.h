@@ -149,6 +149,7 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
       bool isNotFullEventContent;
       vtag muonProducers_;
       edm::InputTag   primaryVertexInputTag_;
+      edm::InputTag   genproductTag_;
       std::string theSTAMuonLabel_;
       edm::InputTag standAloneAssociatorTag_;
       edm::InputTag trackingParticlesTag_;
@@ -181,6 +182,11 @@ class L2seedsAnalyzer : public edm::EDAnalyzer {
         int T_Event_nTruePU;
         int T_Event_nPUm;
         int T_Event_nPUp;
+    
+    
+        float T_Event_GenVtx_x;
+        float T_Event_GenVtx_y;
+        float T_Event_GenVtx_z;
     
         //Reco Muon info
         std::vector<float>*T_Muon_Eta;

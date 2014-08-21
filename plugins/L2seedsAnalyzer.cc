@@ -8,6 +8,7 @@ L2seedsAnalyzer::L2seedsAnalyzer(const edm::ParameterSet& iConfig)
     isMC_                   = iConfig.getParameter<bool>("isMC");
     isJPSIonly_             = iConfig.getParameter<bool>("selectJpsiOnly");
     muonProducers_	= iConfig.getParameter<vtag>("muonProducer");
+    genproductTag_  = iConfig.getParameter<edm::InputTag>("genproductCollection");
     primaryVertexInputTag_  = iConfig.getParameter<edm::InputTag>("primaryVertexInputTag");
     theSTAMuonLabel_ = iConfig.getUntrackedParameter<std::string>("StandAloneTrackCollectionLabel");
     standAloneAssociatorTag_ = iConfig.getParameter<edm::InputTag>("standAloneAssociator");
@@ -201,7 +202,32 @@ L2seedsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
         e(2, 2) = 15. * 15.;
         Vertex::Point p(0, 0, 0);
         dummy = Vertex(p, e, 0, 0, 0);
+        
     }
+    
+    edm::Handle<edm:: HepMCProduct > genEvtHandle;
+    iEvent.getByLabel( genproductTag_, genEvtHandle) ;
+    const HepMC::GenEvent* Evt = genEvtHandle->GetEvent() ;
+    //
+    // this is an example loop over the hierarchy of vertices
+    //
+    
+    float GenVtx_X = -1;
+    float GenVtx_Y = -1;
+    float GenVtx_Z = -1;
+    
+    
+    for ( HepMC::GenEvent::vertex_const_iterator
+         itVtx=Evt->vertices_begin(); itVtx!=Evt->vertices_end(); ++itVtx )
+    {
+        GenVtx_X = (*itVtx)->position().x();
+        GenVtx_Y = (*itVtx)->position().y();
+        GenVtx_Z = (*itVtx)->position().z();
+    }
+    T_Event_GenVtx_x = GenVtx_X;
+    T_Event_GenVtx_y = GenVtx_Y;
+    T_Event_GenVtx_z = GenVtx_Z;
+
     
     T_Event_EventNumber = iEvent.id().event();
     //cout << "event number=" << iEvent.id().event() << endl;
@@ -631,6 +657,12 @@ L2seedsAnalyzer::beginJob()
     mytree_->Branch("T_Event_nTruePU", &T_Event_nTruePU, "T_Event_nTruePU/I");
     mytree_->Branch("T_Event_nPUm", &T_Event_nPUm, "T_Event_nPUm/I");
     mytree_->Branch("T_Event_nPUp", &T_Event_nPUp, "T_Event_nPUp/I");
+    
+    mytree_->Branch("T_Event_GenVtx_x", &T_Event_GenVtx_x, "T_Event_GenVtx_x/F");
+    mytree_->Branch("T_Event_GenVtx_y", &T_Event_GenVtx_y, "T_Event_GenVtx_y/F");
+    mytree_->Branch("T_Event_GenVtx_z", &T_Event_GenVtx_z, "T_Event_GenVtx_z/F");
+
+    
 
     mytree_->Branch("T_Muon_Eta", "std::vector<float>", &T_Muon_Eta);
     mytree_->Branch("T_Muon_Phi", "std::vector<float>", &T_Muon_Phi);
